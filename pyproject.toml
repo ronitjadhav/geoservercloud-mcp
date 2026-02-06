@@ -1,10 +1,13 @@
 [tool.poetry]
-name = "geoservercloud"
-version = "0.0.0"
-description = "Lightweight Python client to interact with GeoServer Cloud REST API, GeoServer ACL and OGC services"
-authors = ["Camptocamp <info@camptocamp.com>"]
+name = "geoservercloud-mcp"
+version = "0.1.0"
+description = "MCP (Model Context Protocol) server for GeoServer - enables AI assistants to manage GeoServer workspaces, datastores, layers, and styles through natural language"
+authors = ["Ronit Jadhav <ronit.jadhav@camptocamp.com>"]
 license = "BSD-2-Clause"
-readme = "README.md"
+readme = "mcp/README.md"
+homepage = "https://github.com/ronitjadhav/geoservercloud-mcp"
+repository = "https://github.com/ronitjadhav/geoservercloud-mcp"
+keywords = ["geoserver", "mcp", "model-context-protocol", "ai", "llm", "geospatial"]
 packages = [
   { include = "geoservercloud" },
   { include = "geoserver_acceptance_tests" },
@@ -18,6 +21,8 @@ xmltodict = "1.0.2"
 psycopg2-binary = "^2.9.9"
 sqlalchemy = "2.0.46"
 pytest = "9.0.2"
+fastmcp = ">=2.0.0"
+
 
 [tool.poetry.group.dev.dependencies]
 responses = "0.25.8"
@@ -40,6 +45,8 @@ build-backend = "poetry.core.masonry.api"
 copy-workspace = "geoservercloud.geoservercloudsync:main"
 copy-test-data = "geoserver_acceptance_tests.cli:copy_test_data"
 extract-test-data = "geoserver_acceptance_tests.cli:extract_test_data"
+geoservercloud-mcp = "geoservercloud.mcp:main"
+
 
 [tool.poetry-dynamic-versioning]
 enable = true

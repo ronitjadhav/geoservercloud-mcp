@@ -1,0 +1,65 @@
+services:
+  # GeoServer MCP Server
+  geoserver-mcp:
+    build:
+      context: ..
+      dockerfile: mcp/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # Connect to the local geoserver service or external GeoServer
+      - GEOSERVER_URL=${GEOSERVER_URL:-http://geoserver:8080/geoserver}
+      - GEOSERVER_USER=${GEOSERVER_USER:-admin}
+      - GEOSERVER_PASSWORD=${GEOSERVER_PASSWORD:-geoserver}
+    depends_on:
+      geoserver:
+        condition: service_healthy
+    networks:
+      - geoserver-net
+
+  # GeoServer instance for local development/testing
+  geoserver:
+    image: docker.osgeo.org/geoserver:2.26.1
+    ports:
+      - "8080:8080"
+
+    environment:
+      - SKIP_DEMO_DATA=false
+      - ROOT_WEBAPP_REDIRECT=true
+    volumes:
+      - geoserver-data:/opt/geoserver/data_dir
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/geoserver/web/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - geoserver-net
+
+  # PostgreSQL with PostGIS for testing datastores
+  postgis:
+    image: postgis/postgis:16-3.4
+    ports:
+      - "5433:5432"  # Using 5433 to avoid conflict with host PostgreSQL
+    environment:
+      - POSTGRES_USER=geoserver
+      - POSTGRES_PASSWORD=geoserver
+      - POSTGRES_DB=geoserver
+    volumes:
+      - postgis-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U geoserver"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - geoserver-net
+
+volumes:
+  geoserver-data:
+  postgis-data:
+
+networks:
+  geoserver-net:
+    driver: bridge
