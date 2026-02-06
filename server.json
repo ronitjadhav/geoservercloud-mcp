@@ -1,0 +1,43 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.ronitjadhav/geoserver",
+  "description": "MCP server for GeoServer - manage workspaces, datastores, layers, and styles through natural language",
+  "repository": {
+    "url": "https://github.com/ronitjadhav/geoservercloud-mcp",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "geoservercloud-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GEOSERVER_URL",
+          "description": "GeoServer base URL (default: http://localhost:8080/geoserver)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "GEOSERVER_USER",
+          "description": "GeoServer username (default: admin)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false
+        },
+        {
+          "name": "GEOSERVER_PASSWORD",
+          "description": "GeoServer password (default: geoserver)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
