@@ -1,5 +1,7 @@
 # GeoServer MCP Server
 
+<!-- mcp-name: io.github.ronitjadhav/geoservercloud-mcp -->
+
 A Model Context Protocol (MCP) server that exposes [GeoServer](https://geoserver.org/) REST API functionality for natural language interaction through AI assistants like Claude, VS Code Copilot, and other MCP-compatible clients.
 
 ## About
@@ -17,32 +19,30 @@ Once connected, you can ask your AI assistant things like:
 
 ---
 
-## Quick Start
+## Installation
 
-### Option 1: Full Local Development Stack
-
-Start the MCP server with a local GeoServer and PostGIS:
+### From PyPI
 
 ```bash
-cd mcp
-docker compose up -d
+pip install geoservercloud-mcp
 ```
 
-This starts:
-- **geoservercloud-mcp**: The MCP server on port 8000
-- **geoserver**: GeoServer instance on port 8080
-- **postgis**: PostGIS database on port 5433
-
-### Option 2: MCP Server Only (Connect to External GeoServer)
-
-If you have an existing GeoServer:
+Or use `uvx` to run without installing (requires [uv](https://docs.astral.sh/uv/)):
 
 ```bash
-cd mcp
-GEOSERVER_URL=http://your-geoserver:8080/geoserver \
-GEOSERVER_USER=admin \
-GEOSERVER_PASSWORD=your-password \
-docker compose up -d geoservercloud-mcp
+# Install uv first (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Run the MCP server
+uvx geoservercloud-mcp
+```
+
+### From MCP Registry
+
+This server is published to the [MCP Registry](https://registry.modelcontextprotocol.io) as:
+
+```text
+io.github.ronitjadhav/geoservercloud-mcp
 ```
 
 ---
@@ -51,21 +51,14 @@ docker compose up -d geoservercloud-mcp
 
 ### VS Code / Cursor
 
-1. Open Command Palette → **"MCP: Add Server"**
-2. Select **"Command (stdio)"**
-3. Enter command: `poetry run geoservercloud-mcp`
-4. Enter server ID: `geoserver`
-
-VS Code will create an MCP configuration file. Update it with the working directory and environment variables:
+Add to your MCP configuration (`.vscode/mcp.json`):
 
 ```json
 {
   "servers": {
     "geoserver": {
-      "type": "stdio",
-      "command": "poetry",
-      "args": ["run", "geoservercloud-mcp"],
-      "cwd": "/path/to/python-geoservercloud",
+      "command": "uvx",
+      "args": ["geoservercloud-mcp"],
       "env": {
         "GEOSERVER_URL": "http://localhost:8080/geoserver",
         "GEOSERVER_USER": "admin",
@@ -87,9 +80,8 @@ Add to your Claude Desktop config:
 {
   "mcpServers": {
     "geoserver": {
-      "command": "poetry",
-      "args": ["run", "geoservercloud-mcp"],
-      "cwd": "/path/to/python-geoservercloud",
+      "command": "uvx",
+      "args": ["geoservercloud-mcp"],
       "env": {
         "GEOSERVER_URL": "http://localhost:8080/geoserver",
         "GEOSERVER_USER": "admin",
@@ -104,20 +96,6 @@ Restart Claude Desktop after saving the configuration.
 
 ---
 
-## Testing with FastMCP Inspector
-
-The MCP server includes a built-in inspector UI for debugging:
-
-```bash
-# From project root
-poetry install
-poetry run fastmcp dev geoservercloud/mcp/server.py
-```
-
-Open http://127.0.0.1:6274 in your browser to test individual tools.
-
----
-
 ## Environment Variables
 
 | Variable | Default | Description |
@@ -125,25 +103,6 @@ Open http://127.0.0.1:6274 in your browser to test individual tools.
 | `GEOSERVER_URL` | `http://localhost:8080/geoserver` | GeoServer base URL |
 | `GEOSERVER_USER` | `admin` | GeoServer username |
 | `GEOSERVER_PASSWORD` | `geoserver` | GeoServer password |
-
----
-
-## Docker Commands
-
-```bash
-# Start all services
-cd mcp
-docker compose up -d
-
-# Stop services
-docker compose down
-
-# Stop and remove volumes (data)
-docker compose down -v
-
-# View logs
-docker compose logs -f geoservercloud-mcp
-```
 
 ---
 
@@ -163,3 +122,9 @@ geoserver.create_workspace("my_workspace")
 ```
 
 Full documentation: <https://camptocamp.github.io/python-geoservercloud/>
+
+---
+
+## Development
+
+For local development, testing, and publishing, see the [Developer Guide](docs/DEVELOPER.md).
