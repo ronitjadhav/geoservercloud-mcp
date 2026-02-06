@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.ronitjadhav/geoserver",
-  "description": "MCP server for GeoServer - manage workspaces, datastores, layers, and styles through natural language",
+  "name": "io.github.ronitjadhav/geoservercloud-mcp",
+  "description": "MCP server for managing GeoServer workspaces, datastores, layers, and styles",
   "repository": {
     "url": "https://github.com/ronitjadhav/geoservercloud-mcp",
     "source": "github"
@@ -11,7 +11,7 @@
     {
       "registryType": "pypi",
       "identifier": "geoservercloud-mcp",
-      "version": "0.1.0",
+      "version": "0.1.6",
       "transport": {
         "type": "stdio"
       },

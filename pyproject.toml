@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "geoservercloud-mcp"
-version = "0.1.0"
+version = "0.1.6"
 description = "MCP (Model Context Protocol) server for GeoServer - enables AI assistants to manage GeoServer workspaces, datastores, layers, and styles through natural language"
 authors = ["Ronit Jadhav <ronit.jadhav@camptocamp.com>"]
 license = "BSD-2-Clause"

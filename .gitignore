@@ -4,3 +4,12 @@
 /.venv/
 .coverage
 docs/build
+
+# MCP Registry tokens (security sensitive)
+.mcpregistry_github_token
+.mcpregistry_registry_token
+
+# Build artifacts
+dist/
+*.whl
+*.tar.gz
