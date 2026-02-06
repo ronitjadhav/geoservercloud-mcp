@@ -1,143 +1,165 @@
-# python-geoservercloud
+# GeoServer MCP Server
 
-## Documentation
+A Model Context Protocol (MCP) server that exposes [GeoServer](https://geoserver.org/) REST API functionality for natural language interaction through AI assistants like Claude, VS Code Copilot, and other MCP-compatible clients.
 
-https://camptocamp.github.io/python-geoservercloud/
+## About
 
-## Installation
+This MCP server wraps the [python-geoservercloud](docs/LIBRARY.md) library, exposing 80+ GeoServer operations as MCP tools. This enables AI assistants to manage GeoServer workspaces, datastores, layers, styles, and more through natural language commands.
 
-From PyPI:
+### Example Interactions
 
-```shell
-pip install geoservercloud
+Once connected, you can ask your AI assistant things like:
+
+- *"List all workspaces in GeoServer"*
+- *"Create a new workspace called 'test_data'"*
+- *"What layers are available in the 'topp' workspace?"*
+- *"Create a PostGIS datastore connection"*
+
+---
+
+## Quick Start
+
+### Option 1: Full Local Development Stack
+
+Start the MCP server with a local GeoServer and PostGIS:
+
+```bash
+cd mcp
+docker compose up -d
 ```
 
-From git repository:
+This starts:
+- **geoservercloud-mcp**: The MCP server on port 8000
+- **geoserver**: GeoServer instance on port 8080
+- **postgis**: PostGIS database on port 5433
 
-```shell
-git clone https://github.com/camptocamp/python-geoservercloud
-cd python-geoservercloud
-python3 -m venv .venv
-source .venv/bin/activate
+### Option 2: MCP Server Only (Connect to External GeoServer)
+
+If you have an existing GeoServer:
+
+```bash
+cd mcp
+GEOSERVER_URL=http://your-geoserver:8080/geoserver \
+GEOSERVER_USER=admin \
+GEOSERVER_PASSWORD=your-password \
+docker compose up -d geoservercloud-mcp
+```
+
+---
+
+## Connecting to AI Clients
+
+### VS Code / Cursor
+
+1. Open Command Palette → **"MCP: Add Server"**
+2. Select **"Command (stdio)"**
+3. Enter command: `poetry run geoservercloud-mcp`
+4. Enter server ID: `geoserver`
+
+VS Code will create an MCP configuration file. Update it with the working directory and environment variables:
+
+```json
+{
+  "servers": {
+    "geoserver": {
+      "type": "stdio",
+      "command": "poetry",
+      "args": ["run", "geoservercloud-mcp"],
+      "cwd": "/path/to/python-geoservercloud",
+      "env": {
+        "GEOSERVER_URL": "http://localhost:8080/geoserver",
+        "GEOSERVER_USER": "admin",
+        "GEOSERVER_PASSWORD": "geoserver"
+      }
+    }
+  }
+}
+```
+
+### Claude Desktop
+
+Add to your Claude Desktop config:
+
+**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**Linux:** `~/.config/Claude/claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "geoserver": {
+      "command": "poetry",
+      "args": ["run", "geoservercloud-mcp"],
+      "cwd": "/path/to/python-geoservercloud",
+      "env": {
+        "GEOSERVER_URL": "http://localhost:8080/geoserver",
+        "GEOSERVER_USER": "admin",
+        "GEOSERVER_PASSWORD": "geoserver"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop after saving the configuration.
+
+---
+
+## Testing with FastMCP Inspector
+
+The MCP server includes a built-in inspector UI for debugging:
+
+```bash
+# From project root
 poetry install
+poetry run fastmcp dev geoservercloud/mcp/server.py
 ```
 
-## Quick start
+Open http://127.0.0.1:6274 in your browser to test individual tools.
+
+---
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GEOSERVER_URL` | `http://localhost:8080/geoserver` | GeoServer base URL |
+| `GEOSERVER_USER` | `admin` | GeoServer username |
+| `GEOSERVER_PASSWORD` | `geoserver` | GeoServer password |
+
+---
+
+## Docker Commands
+
+```bash
+# Start all services
+cd mcp
+docker compose up -d
+
+# Stop services
+docker compose down
+
+# Stop and remove volumes (data)
+docker compose down -v
+
+# View logs
+docker compose logs -f geoservercloud-mcp
+```
+
+---
+
+## Python Library
+
+This MCP server is built on the **python-geoservercloud** library. For programmatic access without MCP, see the [library documentation](docs/LIBRARY.md).
 
 ```python
 from geoservercloud import GeoServerCloud
 
 geoserver = GeoServerCloud(
-    url="http://localhost:9090/geoserver/cloud/",
+    url="http://localhost:8080/geoserver",
     user="admin",
     password="geoserver",
 )
-geoserver.create_workspace("newworkspace")
+geoserver.create_workspace("my_workspace")
 ```
 
-## About
-
-Lightweight Python client to interact with GeoServer Cloud REST API, GeoServer ACL and OGC services.
-Intended use cases are listed below.
-
-### Programmatic setup of a GeoServer catalog
-
-For example, creating a workspace, connecting to a PostGIS datastore and publishing a PG layer:
-
-```python
-geoserver.create_workspace("example")
-geoserver.create_pg_datastore(
-    workspace_name="example",
-    datastore_name="example_store",
-    pg_host="localhost",
-    pg_port=5432,
-    pg_db="database",
-    pg_user="user",
-    pg_password="password"
-)
-geoserver.create_feature_type(
-    layer_name="layer_example",
-    workspace_name="example",
-    datastore_name="example_store",
-    title={
-        "en":"Layer title",
-        "fr": "Titre de la couche",
-        "default": "Default title",
-    },
-)
-```
-
-### Testing
-
-Automatic tests of GeoServer functionalities with `pytest`, for example before upgrading.
-The example below tests the fallback mechanism for internationalized layer titles in the GetCapabilities document.
-
-```python
-@pytest.mark.parametrize(
-    "language,expected_title",
-    [
-        (
-            "en",
-            "Layer title",
-        ),
-        (
-            "fr",
-            "Titre de la couche",
-        ),
-        (
-            "de,en",
-            "Layer title",
-        ),
-        (
-            None,
-            "Default title",
-        ),
-    ],
-)
-def test_i18n_layer_title(geoserver, language, expected_title):
-    capabilities = geoserver.get_wms_layers(
-        workspace="example",
-        accept_languages=language,
-    )
-    layer = capabilities.get("Layer")
-    assert layer.get("Title") == expected_title
-```
-
-A test suite is provided in the directory `geoserver_acceptance_tests`.
-
-### Syncing
-
-Copying a workspace from one GeoServer instance to another, including PG datastores, layers, styles and style images.
-
-#### In a Python console or script
-
-```python
-from geoservercloud import GeoServerCloudSync
-geoserversync = GeoServerCloudSync(
-    src_url="http://localhost:8080/geoserver",
-    src_user="admin",
-    src_password="geoserver",
-    dst_url="http://localhost:9099/geoserver",
-    dst_user="admin",
-    dst_password="geoserver",
-)
-geoserversync.copy_workspace("workspace_name", deep_copy=True)
-```
-
-#### In a shell terminal or script
-
-First install the package in your current virtual environment (see [Installation](#installation)), then run the script with:
-
-```shell
-copy-workspace --src_url "http://localhost:8080/geoserver" --src_user admin --src_password geoserver --dst_url "http://localhost:9099/geoserver" --dst_user admin --dst_password geoserver --workspace workspace_name
-```
-
-### Logging
-
-Set the log level using the standard `logging` module, e.g.:
-
-```python
-import logging
-
-logging.getLogger("geoservercloud").setLevel(logging.DEBUG)
-```
+Full documentation: <https://camptocamp.github.io/python-geoservercloud/>
