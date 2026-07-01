@@ -44,7 +44,7 @@ services:
   postgis:
     image: postgis/postgis:16-3.4
     ports:
-      - "5433:5432"  # Using 5433 to avoid conflict with host PostgreSQL
+      - "5433:5432" # Using 5433 to avoid conflict with host PostgreSQL
     environment:
       - POSTGRES_USER=geoserver
       - POSTGRES_PASSWORD=geoserver

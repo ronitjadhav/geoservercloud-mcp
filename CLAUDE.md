@@ -10,7 +10,7 @@ This is a **fork** of `camptocamp/python-geoservercloud` that adds an MCP server
 
 - Remotes: `fork` = `ronitjadhav/geoservercloud-mcp` (ours), `upstream` = `camptocamp/python-geoservercloud` (parent).
 - **Only ever push to `fork`, never to `upstream`. Never force-push** unless the user explicitly asks. Always name the remote explicitly: `git push fork master`.
-- **Never use GitHub's "Sync fork" button** — it only fast-forwards and will offer to *discard* our commits. Pull upstream changes by merging instead:
+- **Never use GitHub's "Sync fork" button** — it only fast-forwards and will offer to _discard_ our commits. Pull upstream changes by merging instead:
   ```
   git fetch upstream && git merge upstream/master   # resolve, commit
   git push fork master

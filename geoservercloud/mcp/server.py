@@ -22,12 +22,12 @@ mcp = FastMCP(
     "GeoServer MCP",
     instructions="""
     GeoServer MCP provides tools for managing GeoServer via natural language.
-    
+
     IMPORTANT: Before using any GeoServer tools, you should:
     1. First call get_geoserver_connection_info() to check if configured
     2. If not configured or using wrong server, call configure_geoserver_connection()
        to set the GeoServer URL, username, and password
-    
+
     Available capabilities:
     - Workspaces: Create, list, get, delete workspaces
     - Datastores: Manage PostGIS, JNDI, PMTiles, and generic datastores
@@ -85,7 +85,7 @@ def get_geoserver_connection_info() -> dict[str, str]:
     return {
         "url": config["url"],
         "user": config["user"],
-        "password": "***hidden***",
+        "password": "***hidden***",  # nosec B105 - masking placeholder, not a secret
         "configured": config["configured"],
     }
 
@@ -94,7 +94,7 @@ def get_geoserver_connection_info() -> dict[str, str]:
 def configure_geoserver_connection(
     url: str,
     user: str = "admin",
-    password: str = "geoserver",
+    password: str = "geoserver",  # nosec B107 - GeoServer's documented default
 ) -> dict[str, str]:
     """
     Configure the GeoServer connection at runtime.
@@ -150,7 +150,7 @@ def get_workspaces() -> dict[str, Any]:
 def get_workspace(workspace_name: str) -> dict[str, Any]:
     """
     Get details of a specific workspace.
-    
+
     Args:
         workspace_name: Name of the workspace to retrieve
     """
@@ -167,7 +167,7 @@ def create_workspace(
     """
     Create a new workspace in GeoServer.
     If the workspace already exists, it will be updated.
-    
+
     Args:
         workspace_name: Name for the new workspace
         isolated: If True, workspace will be isolated (default: False)
@@ -182,7 +182,7 @@ def delete_workspace(workspace_name: str) -> dict[str, Any]:
     """
     Delete a workspace and all its contents recursively.
     WARNING: This will delete all datastores, layers, and styles in the workspace.
-    
+
     Args:
         workspace_name: Name of the workspace to delete
     """
@@ -199,7 +199,7 @@ def recreate_workspace(
     """
     Recreate a workspace by first deleting it if it exists, then creating it fresh.
     WARNING: This will delete all existing content in the workspace.
-    
+
     Args:
         workspace_name: Name of the workspace
         isolated: If True, workspace will be isolated (default: False)
@@ -213,7 +213,7 @@ def recreate_workspace(
 def get_workspace_wms_settings(workspace_name: str) -> dict[str, Any]:
     """
     Get WMS service settings for a workspace.
-    
+
     Args:
         workspace_name: Name of the workspace
     """
@@ -226,7 +226,7 @@ def get_workspace_wms_settings(workspace_name: str) -> dict[str, Any]:
 def publish_workspace(workspace_name: str) -> dict[str, Any]:
     """
     Enable and publish WMS service for a workspace with default settings.
-    
+
     Args:
         workspace_name: Name of the workspace to publish
     """
@@ -236,12 +236,10 @@ def publish_workspace(workspace_name: str) -> dict[str, Any]:
 
 
 @mcp.tool
-def set_default_locale_for_service(
-    workspace_name: str, locale: str
-) -> dict[str, Any]:
+def set_default_locale_for_service(workspace_name: str, locale: str) -> dict[str, Any]:
     """
     Set a default language for localized WMS requests.
-    
+
     Args:
         workspace_name: Name of the workspace
         locale: Language code (e.g., 'en', 'fr', 'de')
@@ -260,7 +258,7 @@ def set_default_locale_for_service(
 def get_datastores(workspace_name: str) -> dict[str, Any]:
     """
     List all datastores in a workspace.
-    
+
     Args:
         workspace_name: Name of the workspace
     """
@@ -273,7 +271,7 @@ def get_datastores(workspace_name: str) -> dict[str, Any]:
 def get_datastore(workspace_name: str, datastore_name: str) -> dict[str, Any]:
     """
     Get details of a specific datastore.
-    
+
     Args:
         workspace_name: Name of the workspace
         datastore_name: Name of the datastore
@@ -297,7 +295,7 @@ def create_pg_datastore(
 ) -> dict[str, Any]:
     """
     Create a PostGIS datastore connection.
-    
+
     Args:
         workspace_name: Name of the workspace
         datastore_name: Name for the new datastore
@@ -334,7 +332,7 @@ def create_jndi_datastore(
 ) -> dict[str, Any]:
     """
     Create a PostGIS datastore from a JNDI resource.
-    
+
     Args:
         workspace_name: Name of the workspace
         datastore_name: Name for the new datastore
@@ -362,7 +360,7 @@ def create_pmtiles_datastore(
 ) -> dict[str, Any]:
     """
     Create a PMTiles datastore.
-    
+
     Args:
         workspace_name: Name of the workspace
         datastore_name: Name for the new datastore
@@ -390,7 +388,7 @@ def create_datastore(
 ) -> dict[str, Any]:
     """
     Create a generic datastore with custom connection parameters.
-    
+
     Args:
         workspace_name: Name of the workspace
         datastore_name: Name for the new datastore
@@ -420,7 +418,7 @@ def create_datastore(
 def get_wms_store(workspace_name: str, wms_store_name: str) -> dict[str, Any]:
     """
     Get details of a WMS store.
-    
+
     Args:
         workspace_name: Name of the workspace
         wms_store_name: Name of the WMS store
@@ -438,7 +436,7 @@ def create_wms_store(
 ) -> dict[str, Any]:
     """
     Create a cascaded WMS store to proxy an external WMS service.
-    
+
     Args:
         workspace_name: Name of the workspace
         wms_store_name: Name for the new WMS store
@@ -457,7 +455,7 @@ def create_wms_store(
 def delete_wms_store(workspace_name: str, wms_store_name: str) -> dict[str, Any]:
     """
     Delete a WMS store and all its layers.
-    
+
     Args:
         workspace_name: Name of the workspace
         wms_store_name: Name of the WMS store to delete
@@ -473,7 +471,7 @@ def get_wms_layer(
 ) -> dict[str, Any]:
     """
     Get details of a WMS layer.
-    
+
     Args:
         workspace_name: Name of the workspace
         wms_store_name: Name of the WMS store
@@ -493,7 +491,7 @@ def create_wms_layer(
 ) -> dict[str, Any]:
     """
     Publish a layer from a cascaded WMS store.
-    
+
     Args:
         workspace_name: Name of the workspace
         wms_store_name: Name of the WMS store
@@ -516,14 +514,16 @@ def delete_wms_layer(
 ) -> dict[str, Any]:
     """
     Delete a WMS layer.
-    
+
     Args:
         workspace_name: Name of the workspace
         wms_store_name: Name of the WMS store
         wms_layer_name: Name of the WMS layer to delete
     """
     gs = get_geoserver()
-    content, status = gs.delete_wms_layer(workspace_name, wms_store_name, wms_layer_name)
+    content, status = gs.delete_wms_layer(
+        workspace_name, wms_store_name, wms_layer_name
+    )
     return {"message": content, "status_code": status}
 
 
@@ -540,7 +540,7 @@ def create_wmts_store(
 ) -> dict[str, Any]:
     """
     Create a cascaded WMTS store to proxy an external WMTS service.
-    
+
     Args:
         workspace_name: Name of the workspace
         wmts_store_name: Name for the new WMTS store
@@ -559,7 +559,7 @@ def create_wmts_store(
 def delete_wmts_store(workspace_name: str, wmts_store_name: str) -> dict[str, Any]:
     """
     Delete a WMTS store and all its layers.
-    
+
     Args:
         workspace_name: Name of the workspace
         wmts_store_name: Name of the WMTS store to delete
@@ -579,7 +579,7 @@ def create_wmts_layer(
 ) -> dict[str, Any]:
     """
     Publish a layer from a cascaded WMTS store.
-    
+
     Args:
         workspace_name: Name of the workspace
         wmts_store_name: Name of the WMTS store
@@ -607,7 +607,7 @@ def create_wmts_layer(
 def get_feature_types(workspace_name: str, datastore_name: str) -> dict[str, Any]:
     """
     List all feature types (vector layers) in a datastore.
-    
+
     Args:
         workspace_name: Name of the workspace
         datastore_name: Name of the datastore
@@ -623,7 +623,7 @@ def get_feature_type(
 ) -> dict[str, Any]:
     """
     Get details of a specific feature type.
-    
+
     Args:
         workspace_name: Name of the workspace
         datastore_name: Name of the datastore
@@ -648,7 +648,7 @@ def create_feature_type(
 ) -> dict[str, Any]:
     """
     Create a feature type (vector layer) from a database table.
-    
+
     Args:
         layer_name: Name for the layer (must match table name)
         workspace_name: Name of the workspace
@@ -677,7 +677,7 @@ def delete_feature_type(
 ) -> dict[str, Any]:
     """
     Delete a feature type and its associated layer.
-    
+
     Args:
         workspace_name: Name of the workspace
         datastore_name: Name of the datastore
@@ -697,7 +697,7 @@ def delete_feature_type(
 def get_coverages(workspace_name: str, coveragestore_name: str) -> dict[str, Any]:
     """
     List all coverages (raster layers) in a coverage store.
-    
+
     Args:
         workspace_name: Name of the workspace
         coveragestore_name: Name of the coverage store
@@ -713,7 +713,7 @@ def get_coverage(
 ) -> dict[str, Any]:
     """
     Get details of a specific coverage.
-    
+
     Args:
         workspace_name: Name of the workspace
         coveragestore_name: Name of the coverage store
@@ -728,7 +728,7 @@ def get_coverage(
 def get_coverage_store(workspace_name: str, coveragestore_name: str) -> dict[str, Any]:
     """
     Get details of a coverage store.
-    
+
     Args:
         workspace_name: Name of the workspace
         coveragestore_name: Name of the coverage store
@@ -748,7 +748,7 @@ def create_coverage_store(
 ) -> dict[str, Any]:
     """
     Create a coverage store for raster data.
-    
+
     Args:
         workspace_name: Name of the workspace
         coveragestore_name: Name for the coverage store
@@ -776,7 +776,7 @@ def create_coverage(
 ) -> dict[str, Any]:
     """
     Publish a coverage layer from a coverage store.
-    
+
     Args:
         workspace_name: Name of the workspace
         coveragestore_name: Name of the coverage store
@@ -799,7 +799,7 @@ def delete_coverage_store(
 ) -> dict[str, Any]:
     """
     Delete a coverage store and all its coverages.
-    
+
     Args:
         workspace_name: Name of the workspace
         coveragestore_name: Name of the coverage store to delete
@@ -815,7 +815,7 @@ def create_imagemosaic_store_from_directory(
 ) -> dict[str, Any]:
     """
     Create an ImageMosaic coverage store from a directory of raster files.
-    
+
     Args:
         workspace_name: Name of the workspace
         coveragestore_name: Name for the coverage store
@@ -834,7 +834,7 @@ def harvest_granules_to_coverage_store(
 ) -> dict[str, Any]:
     """
     Harvest additional granules (raster files) into an existing ImageMosaic store.
-    
+
     Args:
         workspace_name: Name of the workspace
         coveragestore_name: Name of the coverage store
@@ -856,7 +856,7 @@ def harvest_granules_to_coverage_store(
 def get_layer_groups(workspace_name: str) -> dict[str, Any]:
     """
     List all layer groups in a workspace.
-    
+
     Args:
         workspace_name: Name of the workspace
     """
@@ -869,7 +869,7 @@ def get_layer_groups(workspace_name: str) -> dict[str, Any]:
 def get_layer_group(workspace_name: str, layer_group_name: str) -> dict[str, Any]:
     """
     Get details of a specific layer group.
-    
+
     Args:
         workspace_name: Name of the workspace
         layer_group_name: Name of the layer group
@@ -892,7 +892,7 @@ def create_layer_group(
 ) -> dict[str, Any]:
     """
     Create a layer group combining multiple layers.
-    
+
     Args:
         group_name: Name for the layer group
         workspace_name: Name of the workspace
@@ -921,7 +921,7 @@ def create_layer_group(
 def delete_layer_group(workspace_name: str, layer_group_name: str) -> dict[str, Any]:
     """
     Delete a layer group.
-    
+
     Args:
         workspace_name: Name of the workspace
         layer_group_name: Name of the layer group to delete
@@ -941,7 +941,7 @@ def get_styles(workspace_name: str | None = None) -> dict[str, Any]:
     """
     List all styles. If workspace is provided, list workspace styles,
     otherwise list global styles.
-    
+
     Args:
         workspace_name: Optional workspace name
     """
@@ -956,7 +956,7 @@ def get_style_definition(
 ) -> dict[str, Any]:
     """
     Get the definition of a style.
-    
+
     Args:
         style_name: Name of the style
         workspace_name: Optional workspace name
@@ -974,7 +974,7 @@ def create_style_from_string(
 ) -> dict[str, Any]:
     """
     Create a style from an SLD string.
-    
+
     Args:
         style_name: Name for the new style
         style_content: SLD content as a string
@@ -995,7 +995,7 @@ def set_default_layer_style(
 ) -> dict[str, Any]:
     """
     Set the default style for a layer.
-    
+
     Args:
         layer_name: Name of the layer
         workspace_name: Name of the workspace
@@ -1015,7 +1015,7 @@ def set_default_layer_style(
 def get_gwc_layer(workspace_name: str, layer_name: str) -> dict[str, Any]:
     """
     Get GeoWebCache configuration for a layer.
-    
+
     Args:
         workspace_name: Name of the workspace
         layer_name: Name of the layer
@@ -1031,7 +1031,7 @@ def publish_gwc_layer(
 ) -> dict[str, Any]:
     """
     Enable tile caching for a layer in GeoWebCache.
-    
+
     Args:
         workspace_name: Name of the workspace
         layer_name: Name of the layer
@@ -1046,7 +1046,7 @@ def publish_gwc_layer(
 def delete_gwc_layer(workspace_name: str, layer_name: str) -> dict[str, Any]:
     """
     Remove tile caching for a layer from GeoWebCache.
-    
+
     Args:
         workspace_name: Name of the workspace
         layer_name: Name of the layer
@@ -1061,7 +1061,7 @@ def create_gridset(epsg: int) -> dict[str, Any]:
     """
     Create a gridset for GeoWebCache.
     Supported EPSG codes: 2056, 21781, 3857.
-    
+
     Args:
         epsg: EPSG code for the gridset
     """
@@ -1081,7 +1081,7 @@ def get_wms_layers(
 ) -> dict[str, Any]:
     """
     Get WMS capabilities and list all layers for a workspace.
-    
+
     Args:
         workspace_name: Name of the workspace
         accept_languages: Language preference (e.g., 'en', 'fr')
@@ -1100,7 +1100,7 @@ def get_wms_layers(
 def get_wfs_layers(workspace_name: str) -> dict[str, Any]:
     """
     Get WFS capabilities and list all feature types for a workspace.
-    
+
     Args:
         workspace_name: Name of the workspace
     """
@@ -1118,7 +1118,7 @@ def get_feature(
 ) -> dict[str, Any]:
     """
     WFS GetFeature request to retrieve features from a layer.
-    
+
     Args:
         workspace_name: Name of the workspace
         type_name: Feature type (layer) name
@@ -1136,7 +1136,7 @@ def describe_feature_type(
 ) -> dict[str, Any]:
     """
     WFS DescribeFeatureType request to get schema information.
-    
+
     Args:
         workspace_name: Optional workspace name
         type_name: Optional feature type name
@@ -1152,7 +1152,7 @@ def get_property_value(
 ) -> dict[str, Any]:
     """
     WFS GetPropertyValue request to get values of a specific property.
-    
+
     Args:
         workspace_name: Name of the workspace
         type_name: Feature type (layer) name
@@ -1169,12 +1169,10 @@ def get_property_value(
 
 
 @mcp.tool
-def create_user(
-    username: str, password: str, enabled: bool = True
-) -> dict[str, Any]:
+def create_user(username: str, password: str, enabled: bool = True) -> dict[str, Any]:
     """
     Create a GeoServer user.
-    
+
     Args:
         username: Username for the new user
         password: Password for the new user
@@ -1193,7 +1191,7 @@ def update_user(
 ) -> dict[str, Any]:
     """
     Update a GeoServer user.
-    
+
     Args:
         username: Username to update
         password: New password (optional)
@@ -1208,7 +1206,7 @@ def update_user(
 def delete_user(username: str) -> dict[str, Any]:
     """
     Delete a GeoServer user.
-    
+
     Args:
         username: Username to delete
     """
@@ -1221,7 +1219,7 @@ def delete_user(username: str) -> dict[str, Any]:
 def create_role(role_name: str) -> dict[str, Any]:
     """
     Create a GeoServer role.
-    
+
     Args:
         role_name: Name for the new role
     """
@@ -1234,7 +1232,7 @@ def create_role(role_name: str) -> dict[str, Any]:
 def delete_role(role_name: str) -> dict[str, Any]:
     """
     Delete a GeoServer role.
-    
+
     Args:
         role_name: Name of the role to delete
     """
@@ -1247,7 +1245,7 @@ def delete_role(role_name: str) -> dict[str, Any]:
 def get_user_roles(username: str) -> dict[str, Any]:
     """
     Get all roles assigned to a user.
-    
+
     Args:
         username: Username to get roles for
     """
@@ -1260,7 +1258,7 @@ def get_user_roles(username: str) -> dict[str, Any]:
 def assign_role_to_user(username: str, role_name: str) -> dict[str, Any]:
     """
     Assign a role to a user.
-    
+
     Args:
         username: Username
         role_name: Role to assign
@@ -1274,7 +1272,7 @@ def assign_role_to_user(username: str, role_name: str) -> dict[str, Any]:
 def remove_role_from_user(username: str, role_name: str) -> dict[str, Any]:
     """
     Remove a role from a user.
-    
+
     Args:
         username: Username
         role_name: Role to remove
@@ -1311,7 +1309,7 @@ def create_acl_rule(
 ) -> dict[str, Any]:
     """
     Create a GeoServer ACL data rule.
-    
+
     Args:
         priority: Rule priority (lower = higher priority)
         access: ALLOW or DENY
@@ -1344,7 +1342,7 @@ def create_acl_admin_rule(
 ) -> dict[str, Any]:
     """
     Create a GeoServer ACL admin rule.
-    
+
     Args:
         priority: Rule priority
         access: Access level
@@ -1367,7 +1365,7 @@ def create_acl_admin_rule(
 def delete_acl_admin_rule(rule_id: int) -> dict[str, Any]:
     """
     Delete an ACL admin rule by ID.
-    
+
     Args:
         rule_id: ID of the rule to delete
     """

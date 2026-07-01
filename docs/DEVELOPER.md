@@ -44,13 +44,14 @@ docker compose down           # stop
 docker compose down -v        # stop and wipe all data (fresh start)
 ```
 
-| Service | URL / Port |
-|---------|------------|
-| MCP Server | http://localhost:8000 |
-| GeoServer | http://localhost:8080/geoserver |
-| PostGIS | localhost:5433 (mapped from 5432 to avoid host conflicts) |
+| Service    | URL / Port                                                |
+| ---------- | --------------------------------------------------------- |
+| MCP Server | http://localhost:8000                                     |
+| GeoServer  | http://localhost:8080/geoserver                           |
+| PostGIS    | localhost:5433 (mapped from 5432 to avoid host conflicts) |
 
 **GeoServer extensions** included in the image:
+
 - **MBStyle** (stable) — Mapbox Style support
 - **PMTiles** (community) — PMTiles datastore; requires a GeoServer 3.0.x nightly build
 
@@ -68,11 +69,11 @@ Open http://127.0.0.1:6274.
 
 ### Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GEOSERVER_URL` | `http://localhost:8080/geoserver` | GeoServer base URL |
-| `GEOSERVER_USER` | `admin` | GeoServer username |
-| `GEOSERVER_PASSWORD` | `geoserver` | GeoServer password |
+| Variable             | Default                           | Description        |
+| -------------------- | --------------------------------- | ------------------ |
+| `GEOSERVER_URL`      | `http://localhost:8080/geoserver` | GeoServer base URL |
+| `GEOSERVER_USER`     | `admin`                           | GeoServer username |
+| `GEOSERVER_PASSWORD` | `geoserver`                       | GeoServer password |
 
 If these are unset, the server starts unconfigured and the AI client can set the
 connection at runtime via `configure_geoserver_connection()` (see "Dynamic
