@@ -12,10 +12,10 @@ This MCP server wraps the [python-geoservercloud](docs/LIBRARY.md) library, expo
 
 Once connected, you can ask your AI assistant things like:
 
-- *"List all workspaces in GeoServer"*
-- *"Create a new workspace called 'test_data'"*
-- *"What layers are available in the 'topp' workspace?"*
-- *"Create a PostGIS datastore connection"*
+- _"List all workspaces in GeoServer"_
+- _"Create a new workspace called 'test_data'"_
+- _"What layers are available in the 'topp' workspace?"_
+- _"Create a PostGIS datastore connection"_
 
 ---
 
@@ -73,7 +73,7 @@ Add to your MCP configuration (`.vscode/mcp.json`):
 
 Add to your Claude Desktop config:
 
-**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Linux:** `~/.config/Claude/claude_desktop_config.json`
 
 ```json
@@ -94,15 +94,30 @@ Add to your Claude Desktop config:
 
 Restart Claude Desktop after saving the configuration.
 
+### Dynamic Configuration (No Hardcoded Credentials)
+
+You can omit the `env` section entirely. The AI will ask you for the GeoServer URL, username, and password at runtime:
+
+```json
+{
+  "mcpServers": {
+    "geoserver": {
+      "command": "uvx",
+      "args": ["geoservercloud-mcp"]
+    }
+  }
+}
+```
+
 ---
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `GEOSERVER_URL` | `http://localhost:8080/geoserver` | GeoServer base URL |
-| `GEOSERVER_USER` | `admin` | GeoServer username |
-| `GEOSERVER_PASSWORD` | `geoserver` | GeoServer password |
+| Variable             | Default                           | Description        |
+| -------------------- | --------------------------------- | ------------------ |
+| `GEOSERVER_URL`      | `http://localhost:8080/geoserver` | GeoServer base URL |
+| `GEOSERVER_USER`     | `admin`                           | GeoServer username |
+| `GEOSERVER_PASSWORD` | `geoserver`                       | GeoServer password |
 
 ---
 

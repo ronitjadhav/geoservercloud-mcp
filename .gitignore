@@ -9,6 +9,9 @@ docs/build
 .mcpregistry_github_token
 .mcpregistry_registry_token
 
+# IDE
+.idea/
+
 # Build artifacts
 dist/
 *.whl
