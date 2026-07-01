@@ -102,6 +102,7 @@ def test_get_map(geoserver: GeoServerCloud) -> None:
                         "version": "1.3.0",
                         "bbox": f"{BBOX[1]},{BBOX[0]},{BBOX[3]},{BBOX[2]}",
                         "layers": LAYER,
+                        "styles": "",
                         "width": WIDTH,
                         "height": HEIGHT,
                         "format": FORMAT,
@@ -109,6 +110,7 @@ def test_get_map(geoserver: GeoServerCloud) -> None:
                         "crs": "EPSG:4326",
                         "exceptions": "XML",
                         "bgcolor": "0xFFFFFF",
+                        "time": "2026-02-10T02:10:00Z",
                     }
                 )
             ],
@@ -122,6 +124,7 @@ def test_get_map(geoserver: GeoServerCloud) -> None:
             size=(WIDTH, HEIGHT),
             format=FORMAT,
             srs="EPSG:4326",
+            time="2026-02-10T02:10:00Z",
         )
 
 
@@ -148,6 +151,7 @@ def test_get_feature_info(geoserver: GeoServerCloud) -> None:
                         "version": "1.3.0",
                         "bbox": f"{BBOX[1]},{BBOX[0]},{BBOX[3]},{BBOX[2]}",
                         "layers": LAYER,
+                        "styles": "",
                         "query_layers": LAYER,
                         "width": WIDTH,
                         "height": HEIGHT,
@@ -160,6 +164,7 @@ def test_get_feature_info(geoserver: GeoServerCloud) -> None:
                         "feature_count": 20,
                         "exceptions": "XML",
                         "bgcolor": "0xFFFFFF",
+                        "time": "2026-02-10T02:10:00Z",
                     }
                 )
             ],
@@ -173,6 +178,7 @@ def test_get_feature_info(geoserver: GeoServerCloud) -> None:
             size=(WIDTH, HEIGHT),
             srs="EPSG:4326",
             info_format="text/xml",
+            time="2026-02-10T02:10:00Z",
         )
 
 
