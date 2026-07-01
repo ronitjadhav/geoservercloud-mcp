@@ -17,7 +17,7 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -54,7 +54,7 @@ jobs:
       id-token: write # OIDC for MCP Registry (namespace io.github.<owner>)
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Sync server.json version to the published version
         env:
           VERSION: ${{ needs.publish.outputs.version }}
