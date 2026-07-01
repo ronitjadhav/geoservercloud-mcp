@@ -94,6 +94,31 @@ Add to your Claude Desktop config:
 
 Restart Claude Desktop after saving the configuration.
 
+### Claude Code
+
+Add the server with the `claude mcp add` command:
+
+```bash
+claude mcp add geoserver \
+  --env GEOSERVER_URL=http://localhost:8080/geoserver \
+  --env GEOSERVER_USER=admin \
+  --env GEOSERVER_PASSWORD=geoserver \
+  -- uvx geoservercloud-mcp
+```
+
+This adds it at the default _local_ (per-project) scope. Use `--scope user` to make
+it available in all your projects, or `--scope project` to write it to a shared
+`.mcp.json` committed in the repo. Omit the `--env` flags to configure the connection
+at runtime instead (the AI will ask for the URL and credentials).
+
+Manage it with:
+
+```bash
+claude mcp list
+claude mcp get geoserver
+claude mcp remove geoserver
+```
+
 ### Dynamic Configuration (No Hardcoded Credentials)
 
 You can omit the `env` section entirely. The AI will ask you for the GeoServer URL, username, and password at runtime:
