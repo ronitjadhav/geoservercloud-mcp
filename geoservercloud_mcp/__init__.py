@@ -5,6 +5,6 @@ the GeoServerCloud library, enabling natural language interactions with
 GeoServer REST API.
 """
 
-from geoservercloud_mcp.server import mcp, main
+from geoservercloud_mcp.server import main, mcp
 
 __all__ = ["mcp", "main"]

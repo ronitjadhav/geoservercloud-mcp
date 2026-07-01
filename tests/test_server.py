@@ -5,8 +5,7 @@ These verify the repackaging is intact: the package imports (which requires the
 runtime connection config behaves.
 """
 
-from geoservercloud_mcp import main, mcp
-from geoservercloud_mcp import server
+from geoservercloud_mcp import main, mcp, server
 
 
 def test_entrypoint_and_server_object():

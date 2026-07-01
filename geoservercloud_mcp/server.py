@@ -14,7 +14,6 @@ import os
 from typing import Any
 
 from fastmcp import FastMCP
-
 from geoservercloud import GeoServerCloud
 
 # Create the MCP server
