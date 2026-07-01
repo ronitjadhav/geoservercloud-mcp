@@ -207,11 +207,16 @@ will fail auth.
 
 ### MCP Registry
 
-Also automated in `publish.yaml`: on a `v*` tag, after the PyPI release succeeds, a
-second job publishes `server.json` to the MCP Registry via `mcp-publisher` with
-GitHub OIDC (`github-oidc`). No setup or token needed — the `io.github.ronitjadhav/*`
-namespace is authorized automatically for this repo. Ensure `server.json`'s version
-matches the released PyPI version (same convention as above).
+Also automated in `publish.yaml`, for **both** dev and stable builds: after the PyPI
+job, a second job syncs `server.json`'s version to the just-published version and
+publishes to the MCP Registry via `mcp-publisher` with GitHub OIDC (`github-oidc`).
+No setup or token needed — the `io.github.ronitjadhav/*` namespace is authorized
+automatically for this repo.
+
+> **Note:** unlike PyPI, the MCP Registry has no hidden-pre-release concept, so a
+> published `X.Y.Z.devN` sorts newer than the last stable and becomes the registry's
+> `isLatest`. If you don't want dev builds surfacing to clients that discover via the
+> registry, gate this job to tags with `if: startsWith(github.ref, 'refs/tags/')`.
 
 To publish manually if ever needed:
 

@@ -14,6 +14,8 @@ jobs:
     timeout-minutes: 10
     permissions:
       id-token: write # OIDC for PyPI Trusted Publishing (no stored token)
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -25,9 +27,17 @@ jobs:
         run: poetry install
       - name: Tests
         run: poetry run pytest -q
-      - name: Set dev version for non-tag builds
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        run: poetry version "$(poetry version -s).dev${{ github.run_number }}"
+      - name: Determine version
+        id: version
+        # Tag build -> version from pyproject. Otherwise a dev pre-release.
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            V="$(poetry version -s)"
+          else
+            V="$(poetry version -s).dev${{ github.run_number }}"
+            poetry version "$V"
+          fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
       - name: Build
         run: poetry build
       - name: Publish to PyPI
@@ -35,10 +45,9 @@ jobs:
 
   publish-mcp-registry:
     name: Publish to MCP Registry
-    # Only on stable tags, after the PyPI package exists (the registry validates
-    # the server.json version against PyPI).
+    # Runs for both dev (master) and stable (tag) builds, after the matching
+    # PyPI version exists (the registry validates server.json's version against PyPI).
     needs: publish
-    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     permissions:
@@ -46,6 +55,22 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
+      - name: Sync server.json version to the published version
+        env:
+          VERSION: ${{ needs.publish.outputs.version }}
+        run: |
+          python3 - "$VERSION" <<'PY'
+          import json, sys
+          v = sys.argv[1]
+          with open("server.json") as f:
+              d = json.load(f)
+          d["version"] = v
+          for pkg in d.get("packages", []):
+              pkg["version"] = v
+          with open("server.json", "w") as f:
+              json.dump(d, f, indent=2)
+              f.write("\n")
+          PY
       - name: Install mcp-publisher
         run: |
           curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
