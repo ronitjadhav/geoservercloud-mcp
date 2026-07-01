@@ -205,7 +205,15 @@ GitHub trusted publisher: owner `ronitjadhav`, repo `geoservercloud-mcp`, workfl
 `publish.yaml` (leave environment blank). Until this is configured the publish job
 will fail auth.
 
-### MCP Registry (manual)
+### MCP Registry
+
+Also automated in `publish.yaml`: on a `v*` tag, after the PyPI release succeeds, a
+second job publishes `server.json` to the MCP Registry via `mcp-publisher` with
+GitHub OIDC (`github-oidc`). No setup or token needed — the `io.github.ronitjadhav/*`
+namespace is authorized automatically for this repo. Ensure `server.json`'s version
+matches the released PyPI version (same convention as above).
+
+To publish manually if ever needed:
 
 ```bash
 mcp-publisher login github
