@@ -47,9 +47,7 @@ repos:
         args:
           - --builtin-schema
           - github-workflows-require-timeout
-      - id: check-renovate
-        additional_dependencies:
-          - pyjson5==2.0.0 # pypi
+      - id: check-dependabot
   - repo: https://github.com/sirwart/ripsecrets
     rev: v0.1.11
     hooks:
