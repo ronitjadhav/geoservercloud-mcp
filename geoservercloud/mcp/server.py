@@ -11,7 +11,6 @@ Configuration via environment variables:
 """
 
 import os
-from functools import lru_cache
 from typing import Any
 
 from fastmcp import FastMCP
@@ -24,6 +23,11 @@ mcp = FastMCP(
     instructions="""
     GeoServer MCP provides tools for managing GeoServer via natural language.
     
+    IMPORTANT: Before using any GeoServer tools, you should:
+    1. First call get_geoserver_connection_info() to check if configured
+    2. If not configured or using wrong server, call configure_geoserver_connection()
+       to set the GeoServer URL, username, and password
+    
     Available capabilities:
     - Workspaces: Create, list, get, delete workspaces
     - Datastores: Manage PostGIS, JNDI, PMTiles, and generic datastores
@@ -35,23 +39,22 @@ mcp = FastMCP(
     - Users & Roles: Manage GeoServer security
     - ACL Rules: Configure access control
     - OGC Services: WMS GetMap, WFS GetFeature, WMTS GetTile
-    
-    Before using tools, ensure GeoServer connection is configured via:
-    - GEOSERVER_URL environment variable
-    - GEOSERVER_USER environment variable  
-    - GEOSERVER_PASSWORD environment variable
     """,
 )
 
 
-@lru_cache(maxsize=1)
+# Mutable configuration that can be updated at runtime
+_geoserver_config: dict[str, str] = {
+    "url": os.getenv("GEOSERVER_URL", "http://localhost:8080/geoserver"),
+    "user": os.getenv("GEOSERVER_USER", "admin"),
+    "password": os.getenv("GEOSERVER_PASSWORD", "geoserver"),
+    "configured": "false" if not os.getenv("GEOSERVER_URL") else "true",
+}
+
+
 def get_geoserver_config() -> dict[str, str]:
-    """Get GeoServer configuration from environment variables."""
-    return {
-        "url": os.getenv("GEOSERVER_URL", "http://localhost:8080/geoserver"),
-        "user": os.getenv("GEOSERVER_USER", "admin"),
-        "password": os.getenv("GEOSERVER_PASSWORD", "geoserver"),
-    }
+    """Get current GeoServer configuration."""
+    return _geoserver_config
 
 
 def get_geoserver() -> GeoServerCloud:
@@ -74,13 +77,45 @@ def get_geoserver_connection_info() -> dict[str, str]:
     """
     Get current GeoServer connection information.
     Shows the configured URL and username (password is hidden).
+    Check 'configured' field to see if connection was explicitly set.
+    If configured is 'false', ask the user for connection details
+    and use configure_geoserver_connection() to set them.
     """
     config = get_geoserver_config()
     return {
         "url": config["url"],
         "user": config["user"],
         "password": "***hidden***",
-        "status": "configured",
+        "configured": config["configured"],
+    }
+
+
+@mcp.tool
+def configure_geoserver_connection(
+    url: str,
+    user: str = "admin",
+    password: str = "geoserver",
+) -> dict[str, str]:
+    """
+    Configure the GeoServer connection at runtime.
+    Use this to set the GeoServer URL and credentials when they are not
+    pre-configured via environment variables.
+
+    Args:
+        url: GeoServer base URL (e.g., http://localhost:8080/geoserver)
+        user: GeoServer username (default: admin)
+        password: GeoServer password (default: geoserver)
+    """
+    _geoserver_config["url"] = url
+    _geoserver_config["user"] = user
+    _geoserver_config["password"] = password
+    _geoserver_config["configured"] = "true"
+
+    return {
+        "message": f"GeoServer connection configured: {url}",
+        "url": url,
+        "user": user,
+        "configured": "true",
     }
 
 

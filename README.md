@@ -94,6 +94,21 @@ Add to your Claude Desktop config:
 
 Restart Claude Desktop after saving the configuration.
 
+### Dynamic Configuration (No Hardcoded Credentials)
+
+You can omit the `env` section entirely. The AI will ask you for the GeoServer URL, username, and password at runtime:
+
+```json
+{
+  "mcpServers": {
+    "geoserver": {
+      "command": "uvx",
+      "args": ["geoservercloud-mcp"]
+    }
+  }
+}
+```
+
 ---
 
 ## Environment Variables
