@@ -5,25 +5,29 @@ This guide covers the development workflow for the GeoServer MCP Server.
 ## Project Structure
 
 ```
-python-geoservercloud/
-├── geoservercloud/
-│   ├── mcp/
-│   │   ├── __init__.py      # Package exports
-│   │   └── server.py        # MCP server implementation (FastMCP tools)
-│   └── geoservercloud.py    # Core GeoServer client library (wrapped by the tools)
+geoservercloud-mcp/
+├── geoservercloud_mcp/
+│   ├── __init__.py          # Package exports (mcp, main)
+│   └── server.py            # MCP server implementation (FastMCP tools)
 ├── mcp/
 │   ├── Dockerfile           # MCP server container
-│   └── docker-compose.yml   # Full development stack
+│   └── docker-compose.yml   # Full development stack (GeoServer + PostGIS + MCP)
+├── tests/                   # Smoke tests
+├── docs/                    # This guide, the library README mirror, migration notes
 ├── server.json              # MCP Registry metadata
 ├── pyproject.toml           # Package configuration
 └── README.md
 ```
 
+The actual GeoServer REST logic lives in the upstream `geoservercloud` library,
+which this package depends on via PyPI (see `pyproject.toml`). We only maintain the
+MCP wrapper in `geoservercloud_mcp/`.
+
 ## Prerequisites
 
 - Python 3.10+
 - Poetry
-- Docker & Docker Compose
+- Docker & Docker Compose (only for the local GeoServer stack)
 
 ## Setup
 
@@ -35,9 +39,18 @@ source .venv/bin/activate
 poetry install
 ```
 
-The `.venv` (gitignored) keeps the environment inside the project so editors pick
-it up automatically. Alternatively, skip the venv steps and let Poetry manage its
-own environment — then prefix commands with `poetry run`.
+The `.venv` (gitignored) keeps the environment inside the project so editors pick it
+up automatically. Alternatively, skip the venv steps and let Poetry manage its own
+environment — then prefix commands with `poetry run`.
+
+## Updating the Upstream Library
+
+The GeoServer client comes from the `geoservercloud` PyPI package. To pick up
+upstream changes, bump the dependency — there is no fork to merge:
+
+```bash
+poetry add geoservercloud@latest   # or edit the pin in pyproject.toml, then `poetry lock`
+```
 
 ## Development Stack
 
@@ -65,12 +78,18 @@ docker compose down -v        # stop and wipe all data (fresh start)
 
 ## Testing the MCP Server
 
+Run the smoke tests:
+
+```bash
+poetry run pytest
+```
+
 ### MCP Inspector
 
 Run individual tools interactively without an AI client:
 
 ```bash
-poetry run fastmcp dev geoservercloud/mcp/server.py
+poetry run fastmcp dev geoservercloud_mcp/server.py
 ```
 
 Open http://127.0.0.1:6274.
@@ -89,8 +108,8 @@ Configuration" below).
 
 ### Connecting an AI Client to Local Code
 
-Use `poetry run` with `cwd` pointing at the project instead of the published
-`uvx` package. Replace `/path/to/python-geoservercloud` with your actual path.
+Use `poetry run` with `cwd` pointing at the project instead of the published `uvx`
+package. Replace `/path/to/geoservercloud-mcp` with your actual path.
 
 VS Code / Cursor (`.vscode/mcp.json`):
 
@@ -101,7 +120,7 @@ VS Code / Cursor (`.vscode/mcp.json`):
       "type": "stdio",
       "command": "poetry",
       "args": ["run", "geoservercloud-mcp"],
-      "cwd": "/path/to/python-geoservercloud",
+      "cwd": "/path/to/geoservercloud-mcp",
       "env": {
         "GEOSERVER_URL": "http://localhost:8080/geoserver",
         "GEOSERVER_USER": "admin",
@@ -112,11 +131,11 @@ VS Code / Cursor (`.vscode/mcp.json`):
 }
 ```
 
-Claude Desktop (`~/.config/Claude/claude_desktop_config.json`) uses the same
-values under `mcpServers` instead of `servers`.
+Claude Desktop (`~/.config/Claude/claude_desktop_config.json`) uses the same values
+under `mcpServers` instead of `servers`.
 
-To test the **published** package instead of local code, swap the command to
-`"uvx"` with `"args": ["geoservercloud-mcp"]`.
+To test the **published** package instead of local code, swap the command to `"uvx"`
+with `"args": ["geoservercloud-mcp"]`.
 
 ### Dynamic Configuration (No Environment Variables)
 
@@ -141,27 +160,29 @@ Useful when working with multiple GeoServer instances.
 
 ## Adding New MCP Tools
 
-The MCP server wraps the `GeoServerCloud` class. To add a new tool:
-
-1. Add the method to `geoservercloud/geoservercloud.py`
-2. Add an `@mcp.tool` decorated wrapper in `geoservercloud/mcp/server.py`
+Each tool wraps a method that already exists on the upstream `GeoServerCloud` class.
+Add an `@mcp.tool` decorated wrapper in `geoservercloud_mcp/server.py`:
 
 ```python
 @mcp.tool
-def my_new_tool(param1: str, param2: int) -> str:
+def my_new_tool(param1: str) -> dict:
     """Description shown to AI assistants."""
     gs = get_geoserver()
-    return str(gs.my_new_method(param1, param2))
+    content, status = gs.some_method(param1)
+    return {"content": content, "status_code": status}
 ```
+
+If the method does not exist upstream, contribute it to
+`camptocamp/python-geoservercloud` first, then bump the dependency.
 
 ## Publishing Updates
 
-The fork manages its version manually in both `pyproject.toml` and `server.json`.
+Versioning is static — bump it manually in both `pyproject.toml` and `server.json`.
 
 1. **Bump the version:**
 
    ```bash
-   poetry version patch   # 0.1.0 → 0.1.1  (or `minor`)
+   poetry version patch   # 0.2.0 → 0.2.1  (or `minor`)
    ```
 
 2. **Update `server.json`** — set both the top-level `version` and the
@@ -185,7 +206,6 @@ The fork manages its version manually in both `pyproject.toml` and `server.json`
 
 - **Port conflicts** — PostGIS is mapped to 5433 to avoid clashing with a host
   PostgreSQL on 5432.
-- **Poetry build fails on README** — run `poetry install --no-root`.
 - **MCP Registry publish fails** — the `server.json` version must match the PyPI
   version; the README must contain the `<!-- mcp-name: io.github.username/package -->`
   marker; re-run `mcp-publisher login github` if tokens have expired.

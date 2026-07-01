@@ -4,46 +4,76 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-This is a **fork** of `camptocamp/python-geoservercloud` that adds an MCP server on top of the library. The fork's own work lives in `geoservercloud/mcp/` (a FastMCP server) plus MCP-focused docs/packaging; everything else is the upstream `GeoServerCloud` client library that the MCP server wraps.
+A standalone **MCP server** that exposes GeoServer's REST API as ~69 natural-language
+tools for AI assistants. It is a thin wrapper over the upstream
+[`python-geoservercloud`](https://github.com/camptocamp/python-geoservercloud)
+library, which it depends on **as a PyPI package** (`geoservercloud`), not as a fork.
 
-## Git / fork workflow (important)
+This repo was originally a fork of `camptocamp/python-geoservercloud`; it was
+migrated to a standalone package (see `docs/MIGRATION.md`) so upstream updates are a
+version bump instead of a merge. The GitHub repo is still technically a fork, but we
+no longer merge from it.
 
-- Remotes: `fork` = `ronitjadhav/geoservercloud-mcp` (ours), `upstream` = `camptocamp/python-geoservercloud` (parent).
-- **Only ever push to `fork`, never to `upstream`. Never force-push** unless the user explicitly asks. Always name the remote explicitly: `git push fork master`.
-- **Never use GitHub's "Sync fork" button** — it only fast-forwards and will offer to _discard_ our commits. Pull upstream changes by merging instead:
-  ```
-  git fetch upstream && git merge upstream/master   # resolve, commit
-  git push fork master
-  ```
-- Recurring merge-conflict resolutions: take upstream's newer version pins in `pyproject.toml` but keep `fastmcp`; keep the fork's MCP-focused `README.md` (upstream's library dev section belongs in `docs/`); regenerate `poetry.lock` with `poetry lock` rather than hand-merging.
-- **After merging upstream, re-sync `docs/LIBRARY.md`** — it is a verbatim mirror of the upstream `README.md` (our top-level README is MCP-focused instead). If upstream's README changed, copy the new content into `docs/LIBRARY.md`.
+## Tracking upstream
+
+The library is a normal dependency in `pyproject.toml` (`geoservercloud = ">=0.8.7"`).
+To pick up upstream changes:
+
+```
+poetry add geoservercloud@latest   # or edit the pin, then `poetry lock`
+```
+
+No git merge, no conflict resolution. If upstream's README changed and you want the
+mirror current, refresh `docs/LIBRARY.md` from it (it is a verbatim copy kept for
+reference since our top-level README is MCP-focused).
+
+- Push only to the `fork` remote (`ronitjadhav/geoservercloud-mcp`); never to
+  `upstream`, and never force-push unless explicitly asked.
 
 ## Commands
 
-- Install: `make install` (`poetry lock && poetry install`)
-- Unit tests + coverage: `make tests`
-- Single test: `poetry run pytest tests/path_to_test.py::test_name -vvv`
-- Docs (Sphinx): `make docs`
-- Acceptance tests (spins up GeoServer + PostGIS via Docker, runs, tears down): `make acceptance-tests`. Sub-targets: `acceptance-tests-up`, `acceptance-tests-down`, `acceptance-tests-logs`.
-- Run MCP server locally with inspector UI (http://127.0.0.1:6274): `poetry run fastmcp dev geoservercloud/mcp/server.py`
+- Install: `poetry install`
+- Tests: `poetry run pytest`
+- Single test: `poetry run pytest tests/test_server.py::test_default_config_shape -v`
+- Lint: `poetry run pre-commit run --all-files`
+- Run the server (stdio) locally: `poetry run geoservercloud-mcp`
+- Interactive tool inspector: `poetry run fastmcp dev geoservercloud_mcp/server.py` (http://127.0.0.1:6274)
 - Full dev stack (GeoServer + PostGIS + MCP): `cd mcp && docker compose up -d`
-- Console entry point for the published server: `geoservercloud-mcp` → `geoservercloud.mcp:main`
 
-Versioning is git-tag driven (`poetry-dynamic-versioning`), so the version in `pyproject.toml` is not authoritative at build time.
+Versioning is **static** in `pyproject.toml` — bump it manually and mirror the value
+into `server.json` when publishing.
 
 ## Architecture
 
-Three layers, bottom to top:
+Two layers:
 
-1. **`GeoServerCloud`** (`geoservercloud/geoservercloud.py`) — the core client. All GeoServer REST operations are methods on this one class. It delegates HTTP to `geoservercloud/services/` (`restclient.py`, `restservice.py`, `owsservice.py`) and (de)serializes via the dataclass-style objects in `geoservercloud/models/` (one file per resource: workspace, datastore, featuretype, style, etc.). `GeoServerCloudSync` (`geoservercloudsync.py`) copies workspaces between two instances.
+1. **`geoservercloud` (PyPI dependency)** — the `GeoServerCloud` client class with all
+   the actual GeoServer REST logic. We do not vendor or modify it.
+2. **`geoservercloud_mcp/server.py`** — a `FastMCP` instance whose `@mcp.tool`
+   functions each call `get_geoserver()` (which builds a `GeoServerCloud` from the
+   current config) and return JSON-serializable results. Connection config is a
+   module-level mutable dict seeded from `GEOSERVER_URL`/`GEOSERVER_USER`/
+   `GEOSERVER_PASSWORD`, and changeable at runtime via the
+   `configure_geoserver_connection` tool. `main()` (the `geoservercloud-mcp` entry
+   point) just calls `mcp.run()`.
 
-2. **MCP server** (`geoservercloud/mcp/server.py`) — a `FastMCP` instance exposing ~69 `@mcp.tool`-decorated functions, each a thin wrapper over a `GeoServerCloud` method. Connection config (`url`/`user`/`password`) is held in a module-level mutable dict, seeded from `GEOSERVER_URL`/`GEOSERVER_USER`/`GEOSERVER_PASSWORD` env vars and changeable at runtime via the `configure_geoserver_connection` tool. `get_geoserver()` builds a fresh client per call from that config.
-
-3. **Clients** — Claude Desktop, VS Code/Cursor, etc., connect over MCP.
+The package is named `geoservercloud_mcp` (not `geoservercloud.mcp`) specifically to
+avoid shadowing the installed `geoservercloud` dependency.
 
 ### Adding a new MCP tool
 
-1. Add the method to `GeoServerCloud` in `geoservercloud/geoservercloud.py`.
-2. Add an `@mcp.tool`-decorated wrapper in `geoservercloud/mcp/server.py` that calls `get_geoserver()` and returns a JSON-serializable value. The docstring is what the AI assistant sees — write it for that audience.
+The wrapped method must already exist on `GeoServerCloud` upstream. Add an
+`@mcp.tool` function in `geoservercloud_mcp/server.py`:
 
-Tools are grouped in `server.py` by banner comments (Connection, Workspaces, Datastores, Feature Types, Coverage Stores, WMS/WMTS, Layer Groups, Styles, Users & Roles, ACL, OGC Services).
+```python
+@mcp.tool
+def my_new_tool(param1: str) -> dict:
+    """Description shown to AI assistants."""
+    gs = get_geoserver()
+    content, status = gs.some_method(param1)
+    return {"content": content, "status_code": status}
+```
+
+Tools are grouped in `server.py` by banner comments (Connection, Workspaces,
+Datastores, Feature Types, Coverage Stores, WMS/WMTS, Layer Groups, Styles, Users &
+Roles, ACL, OGC Services).
