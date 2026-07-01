@@ -1,5 +1,9 @@
 # python-geoservercloud
 
+> This is a mirror of the upstream `python-geoservercloud` README, kept here for
+> reference since our top-level README is MCP-focused. Re-sync it from
+> `camptocamp/python-geoservercloud` whenever you merge upstream changes.
+
 ## Documentation
 
 https://camptocamp.github.io/python-geoservercloud/
@@ -139,5 +143,11 @@ Set the log level using the standard `logging` module, e.g.:
 ```python
 import logging
 
-logging.getLogger("geoservercloud").setLevel(logging.DEBUG)
+gs_logger = logging.getLogger("geoservercloud")
+gs_logger.setLevel(logging.DEBUG)
+handler = logging.StreamHandler()
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+gs_logger.addHandler(handler)
 ```

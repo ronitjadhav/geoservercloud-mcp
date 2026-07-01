@@ -16,6 +16,7 @@ This is a **fork** of `camptocamp/python-geoservercloud` that adds an MCP server
   git push fork master
   ```
 - Recurring merge-conflict resolutions: take upstream's newer version pins in `pyproject.toml` but keep `fastmcp`; keep the fork's MCP-focused `README.md` (upstream's library dev section belongs in `docs/`); regenerate `poetry.lock` with `poetry lock` rather than hand-merging.
+- **After merging upstream, re-sync `docs/LIBRARY.md`** — it is a verbatim mirror of the upstream `README.md` (our top-level README is MCP-focused instead). If upstream's README changed, copy the new content into `docs/LIBRARY.md`.
 
 ## Commands
 

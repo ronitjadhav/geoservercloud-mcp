@@ -28,8 +28,16 @@ python-geoservercloud/
 ## Setup
 
 ```bash
+git clone https://github.com/ronitjadhav/geoservercloud-mcp
+cd geoservercloud-mcp
+python3 -m venv .venv
+source .venv/bin/activate
 poetry install
 ```
+
+The `.venv` (gitignored) keeps the environment inside the project so editors pick
+it up automatically. Alternatively, skip the venv steps and let Poetry manage its
+own environment — then prefix commands with `poetry run`.
 
 ## Development Stack
 
