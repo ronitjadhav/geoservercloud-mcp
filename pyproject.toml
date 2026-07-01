@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "geoservercloud-mcp"
-version = "0.1.7"
+version = "0.2.0"
 description = "MCP (Model Context Protocol) server for GeoServer - enables AI assistants to manage GeoServer workspaces, datastores, layers, and styles through natural language"
 authors = ["Ronit Jadhav <ronit.jadhav@camptocamp.com>"]
 license = "BSD-2-Clause"
@@ -8,60 +8,22 @@ readme = "README.md"
 homepage = "https://github.com/ronitjadhav/geoservercloud-mcp"
 repository = "https://github.com/ronitjadhav/geoservercloud-mcp"
 keywords = ["geoserver", "mcp", "model-context-protocol", "ai", "llm", "geospatial"]
-packages = [
-  { include = "geoservercloud" },
-  { include = "geoserver_acceptance_tests" },
-]
+packages = [{ include = "geoservercloud_mcp" }]
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
-requests = "2.34.0"
-OWSLib = "0.35.0"
-xmltodict = "1.0.4"
-psycopg2-binary = "^2.9.9"
-sqlalchemy = "2.0.49"
-pytest = "9.0.3"
+geoservercloud = ">=0.8.7"
 fastmcp = ">=2.0.0"
 
 [tool.poetry.group.dev.dependencies]
-responses = "0.26.0"
-coverage = "7.14.0"
-sphinx = "<8.2.4"
-sphinx-rtd-theme = "3.1.0"
-types-requests = "2.33.0.20260408"
-types-xmltodict = "1.0.1.20260408"
-pytest-mock = "^3.14.0"
-
-[build-system]
-requires = [
-  "poetry-core>=1.0.0",
-  "poetry-dynamic-versioning[plugin]",
-  "poetry-plugin-tweak-dependencies-version",
-]
-build-backend = "poetry.core.masonry.api"
+pytest = ">=8.0.0"
 
 [tool.poetry.scripts]
-copy-workspace = "geoservercloud.geoservercloudsync:main"
-copy-test-data = "geoserver_acceptance_tests.cli:copy_test_data"
-extract-test-data = "geoserver_acceptance_tests.cli:extract_test_data"
-geoservercloud-mcp = "geoservercloud.mcp:main"
+geoservercloud-mcp = "geoservercloud_mcp:main"
 
-
-[tool.poetry-dynamic-versioning]
-enable = true
-vcs = "git"
-pattern = "^(?P<base>\\d+(\\.\\d+)*)"
-format-jinja = """
-{%- if distance == 0 -%}
-{{serialize_pep440(base)}}
-{%- else -%}
-{{serialize_pep440(bump_version(base), dev=distance)}}
-{%- endif -%}
-"""
-fix-shallow-repository = true
-
-[tool.poetry-plugin-tweak-dependencies-version]
-default = "present"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.bandit]
 exclude_dirs = ["tests"]

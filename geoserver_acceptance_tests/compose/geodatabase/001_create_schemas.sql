@@ -1,3 +1,0 @@
-\c acceptance
-CREATE SCHEMA IF NOT EXISTS test1;
-CREATE EXTENSION IF NOT EXISTS postgis;
