@@ -177,30 +177,40 @@ If the method does not exist upstream, contribute it to
 
 ## Publishing Updates
 
-Versioning is static — bump it manually in both `pyproject.toml` and `server.json`.
+PyPI publishing is automated by `.github/workflows/publish.yaml` via PyPI
+[Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (no stored token):
 
-1. **Bump the version:**
+- **Every merge to `master`** publishes a dev pre-release `X.Y.Z.devN` (where
+  `X.Y.Z` is the `pyproject.toml` version and `N` is the CI run number). Dev
+  releases are hidden from `pip install` unless `--pre` is passed.
+- **Pushing a `v*` tag** publishes the stable `X.Y.Z` from `pyproject.toml`.
 
-   ```bash
-   poetry version patch   # 0.2.0 → 0.2.1  (or `minor`)
-   ```
+### Version convention
 
-2. **Update `server.json`** — set both the top-level `version` and the
-   `packages[].version` to match.
+Keep `pyproject.toml` set to the **next** target version so dev builds sort ahead
+of the last release. To cut release `0.3.0`:
 
-3. **Publish to PyPI:**
+```bash
+poetry version 0.3.0                 # if not already there
+# update server.json version + packages[].version to 0.3.0, commit
+git tag v0.3.0 && git push fork v0.3.0   # -> publishes stable 0.3.0
+poetry version 0.4.0                 # start the next dev cycle; commit
+# subsequent merges publish 0.4.0.dev1, 0.4.0.dev2, ...
+```
 
-   ```bash
-   poetry build
-   poetry publish
-   ```
+### One-time PyPI setup (Trusted Publishing)
 
-4. **Publish to the MCP Registry:**
+On <https://pypi.org/manage/project/geoservercloud-mcp/settings/publishing/>, add a
+GitHub trusted publisher: owner `ronitjadhav`, repo `geoservercloud-mcp`, workflow
+`publish.yaml` (leave environment blank). Until this is configured the publish job
+will fail auth.
 
-   ```bash
-   mcp-publisher login github
-   mcp-publisher publish
-   ```
+### MCP Registry (manual)
+
+```bash
+mcp-publisher login github
+mcp-publisher publish
+```
 
 ## Troubleshooting
 
