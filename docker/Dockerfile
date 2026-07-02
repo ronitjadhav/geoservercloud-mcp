@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir poetry
 
 # Copy project files (README is required by pyproject's readme field)
 COPY pyproject.toml poetry.lock* README.md ./
-COPY geoservercloud_mcp ./geoservercloud_mcp/
+COPY src ./src/
 
 # Install the package and its dependencies (installs the geoservercloud-mcp entry point)
 RUN poetry config virtualenvs.create false && \

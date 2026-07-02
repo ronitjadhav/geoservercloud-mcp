@@ -5,31 +5,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 A standalone **MCP server** that exposes GeoServer's REST API as ~69 natural-language
-tools for AI assistants. It is a thin wrapper over the upstream
+tools for AI assistants. It is a thin wrapper over the
 [`python-geoservercloud`](https://github.com/camptocamp/python-geoservercloud)
-library, which it depends on **as a PyPI package** (`geoservercloud`), not as a fork.
-
-This repo was originally a fork of `camptocamp/python-geoservercloud`; it was
-migrated to a standalone package (see `docs/MIGRATION.md`) so upstream updates are a
-version bump instead of a merge, and then fully detached from the fork network into
-its own standalone GitHub repo. It is no longer a fork. The primary git remote is
-`origin`; `upstream` is kept only for refreshing `docs/LIBRARY.md`.
+library, which it depends on **as a PyPI package** (`geoservercloud`) — it does not
+vendor or modify it.
 
 ## Tracking upstream
 
 The library is a normal dependency in `pyproject.toml` (`geoservercloud = ">=0.8.7"`).
-To pick up upstream changes:
+To pick up upstream changes there is no merge — just bump the dependency:
 
 ```
 poetry add geoservercloud@latest   # or edit the pin, then `poetry lock`
 ```
 
-No git merge, no conflict resolution. If upstream's README changed and you want the
-mirror current, refresh `docs/LIBRARY.md` from it (it is a verbatim copy kept for
-reference since our top-level README is MCP-focused).
-
-- Push only to the `fork` remote (`ronitjadhav/geoservercloud-mcp`); never to
-  `upstream`, and never force-push unless explicitly asked.
+- Push only to `origin` (`ronitjadhav/geoservercloud-mcp`); never to `upstream`, and
+  never force-push unless explicitly asked.
 
 ## Commands
 
@@ -38,11 +29,13 @@ reference since our top-level README is MCP-focused).
 - Single test: `poetry run pytest tests/test_server.py::test_default_config_shape -v`
 - Lint: `poetry run pre-commit run --all-files`
 - Run the server (stdio) locally: `poetry run geoservercloud-mcp`
-- Interactive tool inspector: `poetry run fastmcp dev geoservercloud_mcp/server.py` (http://127.0.0.1:6274)
-- Full dev stack (GeoServer + PostGIS + MCP): `cd mcp && docker compose up -d`
+- Interactive tool inspector: `poetry run fastmcp dev src/geoservercloud_mcp/server.py` (http://127.0.0.1:6274)
+- Run via module: `poetry run python -m geoservercloud_mcp`
+- Full dev stack (GeoServer + PostGIS + MCP): `cd docker && docker compose up -d`
 
-Versioning is **static** in `pyproject.toml` — bump it manually and mirror the value
-into `server.json` when publishing.
+Versioning is **git-tag driven** (see `.github/workflows/publish.yaml`): pushing a
+`v*` tag publishes that stable version; merges to `master` publish `<next-patch>.dev<run_id>`.
+The `version` in `pyproject.toml` is ignored at publish time — never hand-bump it.
 
 ## Architecture
 
@@ -50,7 +43,7 @@ Two layers:
 
 1. **`geoservercloud` (PyPI dependency)** — the `GeoServerCloud` client class with all
    the actual GeoServer REST logic. We do not vendor or modify it.
-2. **`geoservercloud_mcp/server.py`** — a `FastMCP` instance whose `@mcp.tool`
+2. **`src/geoservercloud_mcp/server.py`** — a `FastMCP` instance whose `@mcp.tool`
    functions each call `get_geoserver()` (which builds a `GeoServerCloud` from the
    current config) and return JSON-serializable results. Connection config is a
    module-level mutable dict seeded from `GEOSERVER_URL`/`GEOSERVER_USER`/
@@ -64,7 +57,7 @@ avoid shadowing the installed `geoservercloud` dependency.
 ### Adding a new MCP tool
 
 The wrapped method must already exist on `GeoServerCloud` upstream. Add an
-`@mcp.tool` function in `geoservercloud_mcp/server.py`:
+`@mcp.tool` function in `src/geoservercloud_mcp/server.py`:
 
 ```python
 @mcp.tool

@@ -6,7 +6,7 @@ A Model Context Protocol (MCP) server that exposes [GeoServer](https://geoserver
 
 ## About
 
-This MCP server wraps the [python-geoservercloud](docs/LIBRARY.md) library, exposing 80+ GeoServer operations as MCP tools. This enables AI assistants to manage GeoServer workspaces, datastores, layers, styles, and more through natural language commands.
+This MCP server wraps the [python-geoservercloud](https://github.com/camptocamp/python-geoservercloud) library, exposing 80+ GeoServer operations as MCP tools. This enables AI assistants to manage GeoServer workspaces, datastores, layers, styles, and more through natural language commands.
 
 ### Example Interactions
 
@@ -148,7 +148,7 @@ You can omit the `env` section entirely. The AI will ask you for the GeoServer U
 
 ## Python Library
 
-This MCP server is built on the **python-geoservercloud** library. For programmatic access without MCP, see the [library documentation](docs/LIBRARY.md).
+This MCP server is built on the **python-geoservercloud** library. For programmatic access without MCP, see the [library documentation](https://camptocamp.github.io/python-geoservercloud/).
 
 ```python
 from geoservercloud import GeoServerCloud

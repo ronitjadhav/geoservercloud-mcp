@@ -3,7 +3,7 @@ services:
   geoserver-mcp:
     build:
       context: ..
-      dockerfile: mcp/Dockerfile
+      dockerfile: docker/Dockerfile
     ports:
       - "8000:8000"
     environment:
