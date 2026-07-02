@@ -26,6 +26,7 @@ repos:
         exclude: |-
           (?x)(
             (.*/)?poetry\.lock
+            |(.*/)?package-lock\.json
             |.github/changelog-generator-cache/.*
           )
         args:

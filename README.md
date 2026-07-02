@@ -4,6 +4,8 @@
 
 A Model Context Protocol (MCP) server that exposes [GeoServer](https://geoserver.org/) REST API functionality for natural language interaction through AI assistants like Claude, VS Code Copilot, and other MCP-compatible clients.
 
+**🌐 Website:** <https://ronitjadhav.github.io/geoservercloud-mcp/>
+
 ## About
 
 This MCP server wraps the [python-geoservercloud](https://github.com/camptocamp/python-geoservercloud) library, exposing 80+ GeoServer operations as MCP tools. This enables AI assistants to manage GeoServer workspaces, datastores, layers, styles, and more through natural language commands.

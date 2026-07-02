@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - master # -> dev pre-release (X.Y.Z.devN)
-    paths-ignore: # docs-only changes should not cut a dev release
+    paths-ignore: # docs / website changes should not cut a dev release
       - "**.md"
       - "docs/**"
+      - "app/**"
+      - ".github/workflows/pages.yaml"
     tags:
       - "v*" # -> stable release (version taken from the tag, e.g. v0.0.2 -> 0.0.2)
 

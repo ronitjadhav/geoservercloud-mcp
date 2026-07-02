@@ -16,3 +16,7 @@ docs/build
 dist/
 *.whl
 *.tar.gz
+
+# Docs site (app/)
+app/node_modules/
+app/dist/
