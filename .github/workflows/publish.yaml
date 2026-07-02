@@ -8,7 +8,7 @@ on:
       - "**.md"
       - "docs/**"
     tags:
-      - "v*" # -> stable release (version from pyproject.toml)
+      - "v*" # -> stable release (version taken from the tag, e.g. v0.0.2 -> 0.0.2)
 
 jobs:
   publish:
@@ -21,6 +21,8 @@ jobs:
       version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # need full tag history to derive the version
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -32,14 +34,20 @@ jobs:
         run: poetry run pytest -q
       - name: Determine version
         id: version
-        # Tag build -> version from pyproject. Otherwise a dev pre-release.
+        # Version is derived from git, not pyproject.toml (no manual bumps):
+        #   tag build       -> the tag itself (v0.0.2 -> 0.0.2)
+        #   dev build (push) -> next patch above the latest v* tag + .dev<run_id>
+        #                       (e.g. latest v0.0.1 -> 0.0.2.dev<id>, sorts ahead of 0.0.1)
         run: |
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            V="$(poetry version -s)"
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            V="${GITHUB_REF#refs/tags/v}"
           else
-            V="$(poetry version -s).dev${{ github.run_id }}"
-            poetry version "$V"
+            LAST="$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || echo v0.0.0)"
+            LAST="${LAST#v}"
+            NEXT="$(python3 -c "p=[int(x) for x in '${LAST}'.split('.')[:3]]; p+=[0]*(3-len(p)); p[2]+=1; print('%d.%d.%d'%tuple(p))")"
+            V="${NEXT}.dev${{ github.run_id }}"
           fi
+          poetry version "$V"
           echo "version=$V" >> "$GITHUB_OUTPUT"
       - name: Build
         run: poetry build

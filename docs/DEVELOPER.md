@@ -178,26 +178,27 @@ If the method does not exist upstream, contribute it to
 ## Publishing Updates
 
 PyPI publishing is automated by `.github/workflows/publish.yaml` via PyPI
-[Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (no stored token):
+[Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (no stored token).
+**The version is derived from git — you never edit it by hand:**
 
-- **Every merge to `master`** publishes a dev pre-release `X.Y.Z.devN` (where
-  `X.Y.Z` is the `pyproject.toml` version and `N` is the unique GitHub Actions run
-  id — always increasing, so builds never collide even if the repo is recreated).
-  Dev releases are hidden from `pip install` unless `--pre` is passed.
-- **Pushing a `v*` tag** publishes the stable `X.Y.Z` from `pyproject.toml`.
+- **Pushing a `v*` tag** publishes that stable version (`v0.0.2` → `0.0.2`).
+- **Every merge to `master`** publishes a dev pre-release `<next-patch>.dev<run_id>`,
+  where `<next-patch>` is one patch above the latest `v*` tag (so with `v0.0.1` out,
+  merges publish `0.0.2.devN`, sorting ahead of `0.0.1`). `run_id` is unique and
+  always increasing, so builds never collide even if the repo is recreated. Dev
+  releases are hidden from `pip install` unless `--pre` is passed.
 
-### Version convention
+The `version` field in `pyproject.toml` is ignored at publish time (CI overrides it),
+so there is nothing to bump between releases.
 
-Keep `pyproject.toml` set to the **next** target version so dev builds sort ahead
-of the last release. To cut release `0.3.0`:
+### Cutting a release
 
 ```bash
-poetry version 0.3.0                 # if not already there
-# update server.json version + packages[].version to 0.3.0, commit
-git tag v0.3.0 && git push fork v0.3.0   # -> publishes stable 0.3.0
-poetry version 0.4.0                 # start the next dev cycle; commit
-# subsequent merges publish 0.4.0.dev1, 0.4.0.dev2, ...
+git tag v0.0.2 && git push origin v0.0.2   # -> publishes stable 0.0.2 to PyPI + MCP Registry
 ```
+
+That's it — no version edits, no post-release bump. Merges after that automatically
+publish `0.0.3.devN` until the next tag.
 
 ### One-time PyPI setup (Trusted Publishing)
 
