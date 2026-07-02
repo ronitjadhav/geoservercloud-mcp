@@ -248,6 +248,19 @@ def set_default_locale_for_service(workspace_name: str, locale: str) -> dict[str
     return {"message": content, "status_code": status}
 
 
+@mcp.tool
+def unset_default_locale_for_service(workspace_name: str) -> dict[str, Any]:
+    """
+    Remove the default language configured for localized WMS requests.
+
+    Args:
+        workspace_name: Name of the workspace
+    """
+    gs = get_geoserver()
+    content, status = gs.unset_default_locale_for_service(workspace_name)
+    return {"message": content, "status_code": status}
+
+
 # =============================================================================
 # DATASTORES
 # =============================================================================
@@ -278,6 +291,34 @@ def get_datastore(workspace_name: str, datastore_name: str) -> dict[str, Any]:
     gs = get_geoserver()
     content, status = gs.get_datastore(workspace_name, datastore_name)
     return {"datastore": content, "status_code": status}
+
+
+@mcp.tool
+def get_pg_datastore(workspace_name: str, datastore_name: str) -> dict[str, Any]:
+    """
+    Get details of a PostGIS datastore, including its connection parameters.
+
+    Args:
+        workspace_name: Name of the workspace
+        datastore_name: Name of the datastore
+    """
+    gs = get_geoserver()
+    content, status = gs.get_pg_datastore(workspace_name, datastore_name)
+    return {"datastore": content, "status_code": status}
+
+
+@mcp.tool
+def delete_datastore(workspace_name: str, datastore_name: str) -> dict[str, Any]:
+    """
+    Delete a datastore from a workspace.
+
+    Args:
+        workspace_name: Name of the workspace
+        datastore_name: Name of the datastore to delete
+    """
+    gs = get_geoserver()
+    content, status = gs.delete_datastore(workspace_name, datastore_name)
+    return {"message": content, "status_code": status}
 
 
 @mcp.tool
@@ -846,6 +887,29 @@ def harvest_granules_to_coverage_store(
     return {"message": content, "status_code": status}
 
 
+@mcp.tool
+def publish_granule_to_coverage_store(
+    workspace_name: str,
+    coveragestore_name: str,
+    method: str,
+    granule_path: str,
+) -> dict[str, Any]:
+    """
+    Publish a single granule (raster file) to an existing ImageMosaic coverage store.
+
+    Args:
+        workspace_name: Name of the workspace
+        coveragestore_name: Name of the coverage store
+        method: Publish method (e.g., 'file' or 'external')
+        granule_path: Path to the granule file
+    """
+    gs = get_geoserver()
+    content, status = gs.publish_granule_to_coverage_store(
+        workspace_name, coveragestore_name, method, granule_path
+    )
+    return {"message": content, "status_code": status}
+
+
 # =============================================================================
 # LAYER GROUPS
 # =============================================================================
@@ -984,6 +1048,56 @@ def create_style_from_string(
         style_name=style_name,
         style_string=style_content,
         workspace_name=workspace_name,
+    )
+    return {"message": content, "status_code": status}
+
+
+@mcp.tool
+def create_style_from_file(
+    style_name: str,
+    file: str,
+    workspace_name: str | None = None,
+) -> dict[str, Any]:
+    """
+    Create a style by uploading a local style file (SLD, or a ZIP bundling an SLD
+    with its images). The path is read from the machine running the MCP server.
+
+    Args:
+        style_name: Name for the new style
+        file: Path to the style file (.sld or .zip)
+        workspace_name: Optional workspace (global if not provided)
+    """
+    gs = get_geoserver()
+    content, status = gs.create_style_from_file(
+        style_name=style_name,
+        file=file,
+        workspace_name=workspace_name,
+    )
+    return {"message": content, "status_code": status}
+
+
+@mcp.tool
+def create_style_definition(
+    style_name: str,
+    filename: str,
+    workspace_name: str | None = None,
+    style_format: str = "sld",
+) -> dict[str, Any]:
+    """
+    Create a style catalog entry pointing at an existing style file on the server.
+
+    Args:
+        style_name: Name for the new style
+        filename: Name of the backing style file (e.g., 'my_style.sld')
+        workspace_name: Optional workspace (global if not provided)
+        style_format: Style format (default: 'sld')
+    """
+    gs = get_geoserver()
+    content, status = gs.create_style_definition(
+        style_name=style_name,
+        filename=filename,
+        workspace_name=workspace_name,
+        format=style_format,
     )
     return {"message": content, "status_code": status}
 
@@ -1329,6 +1443,38 @@ def create_acl_rule(
         workspace_name=workspace_name,
     )
     return {"rule": content, "status_code": status}
+
+
+@mcp.tool
+def create_acl_rules_for_requests(
+    requests: list[str],
+    priority: int = 0,
+    access: str = "DENY",
+    role: str | None = None,
+    service: str | None = None,
+    workspace_name: str | None = None,
+) -> dict[str, Any]:
+    """
+    Create one ACL data rule per request type in a single call.
+
+    Args:
+        requests: Request types to create rules for (e.g., ["GetMap", "GetFeature"])
+        priority: Rule priority (lower = higher priority)
+        access: ALLOW or DENY
+        role: Role name (optional)
+        service: Service (WMS, WFS, etc.)
+        workspace_name: Workspace (optional)
+    """
+    gs = get_geoserver()
+    results = gs.create_acl_rules_for_requests(
+        requests=requests,
+        priority=priority,
+        access=access,
+        role=role,
+        service=service,
+        workspace_name=workspace_name,
+    )
+    return {"results": [{"rule": c, "status_code": s} for c, s in results]}
 
 
 @mcp.tool

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A standalone **MCP server** that exposes GeoServer's REST API as ~69 natural-language
+A standalone **MCP server** that exposes GeoServer's REST API as ~76 natural-language
 tools for AI assistants. It is a thin wrapper over the
 [`python-geoservercloud`](https://github.com/camptocamp/python-geoservercloud)
 library, which it depends on **as a PyPI package** (`geoservercloud`) — it does not
