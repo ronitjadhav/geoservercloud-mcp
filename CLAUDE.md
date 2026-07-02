@@ -53,12 +53,14 @@ copy in `app/src/App.vue`. The things most likely to drift:
 - Quick-start tab commands (especially the `claude mcp add` snippet)
 
 **Dev:**
+
 ```bash
 cd app && npm install   # first time
 npm run dev             # http://localhost:5173/
 ```
 
 **Key files:**
+
 - `app/src/App.vue` — all content (data arrays + template)
 - `app/src/style.css` — neobrutalist design tokens and layout
 - `app/public/geoservercloud-mcp.png` — logo (globe + wordmark); trimmed with Pillow

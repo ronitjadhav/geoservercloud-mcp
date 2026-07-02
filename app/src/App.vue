@@ -184,9 +184,7 @@ function copyInstall() {
             <div class="msg bot">
               <span class="who">GeoServer MCP</span>
               On it — ran two tools:
-              <div class="tool">
-                ✓ create_workspace <span>demo</span>
-              </div>
+              <div class="tool">✓ create_workspace <span>demo</span></div>
               <div class="tool">
                 ✓ create_pg_datastore <span>demo · main</span>
               </div>
