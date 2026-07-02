@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A standalone **MCP server** that exposes GeoServer's REST API as ~69 natural-language
+A standalone **MCP server** that exposes GeoServer's REST API as ~76 natural-language
 tools for AI assistants. It is a thin wrapper over the
 [`python-geoservercloud`](https://github.com/camptocamp/python-geoservercloud)
 library, which it depends on **as a PyPI package** (`geoservercloud`) — it does not
@@ -19,8 +19,23 @@ To pick up upstream changes there is no merge — just bump the dependency:
 poetry add geoservercloud@latest   # or edit the pin, then `poetry lock`
 ```
 
-- Push only to `origin` (`ronitjadhav/geoservercloud-mcp`); never to `upstream`, and
-  never force-push unless explicitly asked.
+After bumping, run `poetry run pytest`: the coverage guard (see "Adding a new MCP
+tool") flags any new upstream methods that lack a tool.
+
+## Working in this repo (important)
+
+- **`master` is branch-protected.** All changes go through a PR — **you cannot
+  `git push origin master` directly, and force-pushes are blocked.** A PR only merges
+  once the `Lint and test` CI check is green (no approval required — self-merge is
+  fine). Escape hatch if ever needed: disable the rule in Settings → Branches, or
+  `gh api -X DELETE repos/ronitjadhav/geoservercloud-mcp/branches/master/protection`.
+- Push only to `origin` (`ronitjadhav/geoservercloud-mcp`). There is no `upstream`
+  remote anymore (the repo was detached from its fork network); never force-push
+  unless explicitly asked.
+- **CI runs `pre-commit` with no `SKIP`**, so every hook (black, isort, prettier,
+  bandit, mypy, ripsecrets, check-dependabot, …) is enforced. Run it locally before
+  pushing. `pre-commit` isn't a poetry dep; install it with
+  `pip install --user --break-system-packages pre-commit` if missing.
 
 ## Commands
 
@@ -33,9 +48,29 @@ poetry add geoservercloud@latest   # or edit the pin, then `poetry lock`
 - Run via module: `poetry run python -m geoservercloud_mcp`
 - Full dev stack (GeoServer + PostGIS + MCP): `cd docker && docker compose up -d`
 
-Versioning is **git-tag driven** (see `.github/workflows/publish.yaml`): pushing a
-`v*` tag publishes that stable version; merges to `master` publish `<next-patch>.dev<run_id>`.
-The `version` in `pyproject.toml` is ignored at publish time — never hand-bump it.
+## Releasing & versioning
+
+Publishing is fully automated by `.github/workflows/publish.yaml` (PyPI Trusted
+Publishing + MCP Registry via GitHub OIDC — no stored tokens). **Versioning is
+git-tag driven; the `version` in `pyproject.toml` is ignored at publish time — never
+hand-bump it.**
+
+- **Cut a release:** `git tag vX.Y.Z && git push origin vX.Y.Z` → publishes stable
+  `X.Y.Z` to PyPI **and** the MCP Registry.
+- **Every merge to `master`** publishes `<next-patch-above-latest-tag>.dev<run_id>`
+  to both (dev builds; hidden from `pip install` without `--pre`). Docs-only changes
+  (`**.md`, `docs/**`) are skipped via `paths-ignore`.
+
+**Hard-won lesson — never version backward.** Both PyPI and the MCP Registry pick
+"latest" by **semver ordering**, so publishing a _lower_ version (e.g. resetting to
+`0.0.1` when `0.3.0` exists) will NOT become latest — it just sits below and is
+effectively invisible. To supersede an old version, publish a **higher** one.
+
+- **PyPI**: deleted versions are permanent — a number can never be reused, and there
+  is no delete API (web UI only).
+- **MCP Registry**: versions _can_ be hidden via
+  `PATCH /v0.1/servers/{name}/versions/{version}/status` (`active`/`deprecated`/`deleted`,
+  auth via `mcp-publisher login github-oidc`), but `isLatest` is still by semver.
 
 ## Architecture
 
@@ -70,4 +105,12 @@ def my_new_tool(param1: str) -> dict:
 
 Tools are grouped in `server.py` by banner comments (Connection, Workspaces,
 Datastores, Feature Types, Coverage Stores, WMS/WMTS, Layer Groups, Styles, Users &
-Roles, ACL, OGC Services).
+Roles, ACL, OGC Services). Return a JSON-serializable dict — usually
+`{"<thing>": content, "status_code": status}`.
+
+`tests/test_tool_coverage.py` guards coverage: it fails if `server.py` calls a
+`GeoServerCloud` method that doesn't exist, or if an upstream method is unwrapped and
+not listed in `INTENTIONALLY_UNCOVERED`. Methods that return **binary bodies**
+(`get_map`, `get_tile`, `get_legend_graphic`, `get_feature_info`) or take **raw
+bytes** are intentionally not exposed — they don't serialize to MCP text output; add
+them only with a file-path/base64 design.
