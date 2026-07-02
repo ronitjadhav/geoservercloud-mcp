@@ -1,0 +1,83 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - master # -> dev pre-release (X.Y.Z.devN)
+    paths-ignore: # docs-only changes should not cut a dev release
+      - "**.md"
+      - "docs/**"
+    tags:
+      - "v*" # -> stable release (version from pyproject.toml)
+
+jobs:
+  publish:
+    name: Build and publish to PyPI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      id-token: write # OIDC for PyPI Trusted Publishing (no stored token)
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install
+        run: poetry install
+      - name: Tests
+        run: poetry run pytest -q
+      - name: Determine version
+        id: version
+        # Tag build -> version from pyproject. Otherwise a dev pre-release.
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            V="$(poetry version -s)"
+          else
+            V="$(poetry version -s).dev${{ github.run_id }}"
+            poetry version "$V"
+          fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+      - name: Build
+        run: poetry build
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-mcp-registry:
+    name: Publish to MCP Registry
+    # Runs for both dev (master) and stable (tag) builds, after the matching
+    # PyPI version exists (the registry validates server.json's version against PyPI).
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      id-token: write # OIDC for MCP Registry (namespace io.github.<owner>)
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Sync server.json version to the published version
+        env:
+          VERSION: ${{ needs.publish.outputs.version }}
+        run: |
+          python3 - "$VERSION" <<'PY'
+          import json, sys
+          v = sys.argv[1]
+          with open("server.json") as f:
+              d = json.load(f)
+          d["version"] = v
+          for pkg in d.get("packages", []):
+              pkg["version"] = v
+          with open("server.json", "w") as f:
+              json.dump(d, f, indent=2)
+              f.write("\n")
+          PY
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+      - name: Authenticate (GitHub OIDC)
+        run: ./mcp-publisher login github-oidc
+      - name: Publish
+        run: ./mcp-publisher publish
