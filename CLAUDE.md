@@ -55,7 +55,7 @@ copy in `app/src/App.vue`. The things most likely to drift:
 **Dev:**
 ```bash
 cd app && npm install   # first time
-npm run dev             # http://localhost:5173/geoservercloud-mcp/
+npm run dev             # http://localhost:5173/
 ```
 
 **Key files:**

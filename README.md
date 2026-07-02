@@ -4,6 +4,8 @@
 
 ![GeoServer MCP](app/public/geoservercloud-mcp.png)
 
+**🌐 [geoservermcp.maplabs.tech](https://geoservermcp.maplabs.tech)**
+
 An MCP server that wraps the [python-geoservercloud](https://github.com/camptocamp/python-geoservercloud) library, exposing 80+ GeoServer operations as natural-language tools for AI assistants like Claude, VS Code Copilot, and other MCP-compatible clients.
 
 ---
