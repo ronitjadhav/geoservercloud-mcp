@@ -6,22 +6,25 @@ This guide covers the development workflow for the GeoServer MCP Server.
 
 ```
 geoservercloud-mcp/
-├── geoservercloud_mcp/
-│   ├── __init__.py          # Package exports (mcp, main)
-│   └── server.py            # MCP server implementation (FastMCP tools)
-├── mcp/
+├── src/
+│   └── geoservercloud_mcp/
+│       ├── __init__.py      # Package exports (mcp, main)
+│       ├── __main__.py      # `python -m geoservercloud_mcp` entry point
+│       └── server.py        # MCP server implementation (FastMCP tools)
+├── docker/
 │   ├── Dockerfile           # MCP server container
 │   └── docker-compose.yml   # Full development stack (GeoServer + PostGIS + MCP)
 ├── tests/                   # Smoke tests
-├── docs/                    # This guide, the library README mirror, migration notes
+├── docs/                    # This guide
 ├── server.json              # MCP Registry metadata
 ├── pyproject.toml           # Package configuration
 └── README.md
 ```
 
-The actual GeoServer REST logic lives in the upstream `geoservercloud` library,
-which this package depends on via PyPI (see `pyproject.toml`). We only maintain the
-MCP wrapper in `geoservercloud_mcp/`.
+The layout follows the standard MCP Python server convention (`src/` layout, single
+`server.py`). The actual GeoServer REST logic lives in the upstream `geoservercloud`
+library, which this package depends on via PyPI (see `pyproject.toml`); we only
+maintain the MCP wrapper in `src/geoservercloud_mcp/`.
 
 ## Prerequisites
 
@@ -54,10 +57,10 @@ poetry add geoservercloud@latest   # or edit the pin in pyproject.toml, then `po
 
 ## Development Stack
 
-The `mcp/docker-compose.yml` runs GeoServer, PostGIS, and the MCP server together.
+The `docker/docker-compose.yml` runs GeoServer, PostGIS, and the MCP server together.
 
 ```bash
-cd mcp
+cd docker
 docker compose up -d          # start
 docker compose ps             # status
 docker compose logs -f geoserver-mcp   # logs
@@ -89,7 +92,7 @@ poetry run pytest
 Run individual tools interactively without an AI client:
 
 ```bash
-poetry run fastmcp dev geoservercloud_mcp/server.py
+poetry run fastmcp dev src/geoservercloud_mcp/server.py
 ```
 
 Open http://127.0.0.1:6274.
@@ -161,7 +164,7 @@ Useful when working with multiple GeoServer instances.
 ## Adding New MCP Tools
 
 Each tool wraps a method that already exists on the upstream `GeoServerCloud` class.
-Add an `@mcp.tool` decorated wrapper in `geoservercloud_mcp/server.py`:
+Add an `@mcp.tool` decorated wrapper in `src/geoservercloud_mcp/server.py`:
 
 ```python
 @mcp.tool
