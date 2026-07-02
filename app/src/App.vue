@@ -52,16 +52,6 @@ const features = [
 
 const tabs = [
   {
-    key: "uvx",
-    label: "uvx",
-    code: `# run without installing (needs uv)\nuvx geoservercloud-mcp`,
-  },
-  {
-    key: "pip",
-    label: "pip",
-    code: `pip install geoservercloud-mcp\ngeoservercloud-mcp`,
-  },
-  {
     key: "claude-code",
     label: "Claude Code",
     code: `claude mcp add geoserver \\\n  --env GEOSERVER_URL=http://localhost:8080/geoserver \\\n  --env GEOSERVER_USER=admin \\\n  --env GEOSERVER_PASSWORD=geoserver \\\n  -- uvx geoservercloud-mcp`,
@@ -83,8 +73,18 @@ const tabs = [
   }
 }`,
   },
+  {
+    key: "uvx",
+    label: "uvx",
+    code: `# run without installing (needs uv)\nuvx geoservercloud-mcp`,
+  },
+  {
+    key: "pip",
+    label: "pip",
+    code: `pip install geoservercloud-mcp\ngeoservercloud-mcp`,
+  },
 ];
-const active = ref(tabs[0].key);
+const active = ref("claude-code");
 
 const prompts = [
   "List all workspaces in GeoServer",
@@ -95,7 +95,7 @@ const prompts = [
   "Cascade the WMS service at example.com into a new layer",
 ];
 
-const installCmd = "uvx geoservercloud-mcp";
+const installCmd = "claude mcp add geoserver -- uvx geoservercloud-mcp";
 const copied = ref(false);
 function copyInstall() {
   navigator.clipboard?.writeText(installCmd).then(() => {
@@ -106,12 +106,15 @@ function copyInstall() {
 </script>
 
 <template>
-  <header class="nav">
+  <header class="nav" id="top">
     <div class="nav-inner">
-      <div class="brand">
-        <span class="mark">🌐</span>
-        <span>GeoServer MCP</span>
-      </div>
+      <a class="brand" href="#top">
+        <img
+          class="brand-logo"
+          src="/geoservercloud-mcp.png"
+          alt="GeoServer MCP"
+        />
+      </a>
       <nav class="nav-links">
         <a :href="GITHUB" target="_blank" rel="noopener">GitHub</a>
         <a :href="PYPI" target="_blank" rel="noopener">PyPI</a>
@@ -123,23 +126,27 @@ function copyInstall() {
   <main class="wrap">
     <!-- HERO -->
     <section class="hero">
-      <div>
-        <span class="neo-badge">v1.0.0 · Model Context Protocol server</span>
-        <h1>Talk to GeoServer in plain language.</h1>
-        <p class="lead">
+      <div class="hero-copy">
+        <span class="eyebrow rise" style="--d: 0s">
+          <span class="pulse"></span> GeoServer × Model Context Protocol
+        </span>
+        <h1 class="rise" style="--d: 0.05s">
+          Talk to <span class="hl">GeoServer</span>.
+        </h1>
+        <p class="lead rise" style="--d: 0.1s">
           An MCP server that lets AI assistants like Claude manage GeoServer
-          workspaces, datastores, layers, and styles — exposing 70+ REST
-          operations as natural-language tools.
+          workspaces, datastores, layers, and styles — 70+ REST operations
+          exposed as natural-language tools.
         </p>
 
-        <div class="cmd">
-          <code>$ {{ installCmd }}</code>
+        <div class="cmd rise" style="--d: 0.15s">
+          <code>{{ installCmd }}</code>
           <button @click="copyInstall">
-            {{ copied ? "copied!" : "copy" }}
+            {{ copied ? "✓ copied" : "copy" }}
           </button>
         </div>
 
-        <div class="cta-row">
+        <div class="cta-row rise" style="--d: 0.2s">
           <a class="neo-btn" :href="GITHUB" target="_blank" rel="noopener"
             >★ Star on GitHub</a
           >
@@ -148,7 +155,7 @@ function copyInstall() {
           >
         </div>
 
-        <div class="tags">
+        <div class="tags rise" style="--d: 0.25s">
           <span class="t">Python</span>
           <span class="t">FastMCP</span>
           <span class="t">GeoServer</span>
@@ -157,14 +164,71 @@ function copyInstall() {
         </div>
       </div>
 
-      <div class="shot">
-        <img
-          src="/geoservercloud-mcp.webp"
-          alt="GeoServer MCP"
-          width="1280"
-          height="720"
-        />
+      <div class="hero-visual rise" style="--d: 0.15s">
+        <div class="chatwin">
+          <div class="chat-head">
+            <span class="dot r"></span>
+            <span class="dot y"></span>
+            <span class="dot g"></span>
+            <img
+              class="chat-logo"
+              src="/geoservercloud-mcp.png"
+              alt="GeoServer MCP"
+            />
+          </div>
+          <div class="chat-body">
+            <div class="msg user">
+              Create a workspace called <b>demo</b> and connect our PostGIS
+              database.
+            </div>
+            <div class="msg bot">
+              <span class="who">GeoServer MCP</span>
+              On it — ran two tools:
+              <div class="tool">
+                ✓ create_workspace <span>demo</span>
+              </div>
+              <div class="tool">
+                ✓ create_pg_datastore <span>demo · main</span>
+              </div>
+            </div>
+            <div class="msg user">Now publish the <b>roads</b> table.</div>
+            <div class="msg bot">
+              <span class="who">GeoServer MCP</span>
+              <div class="tool">
+                ✓ create_feature_type <span>demo:roads</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+    </section>
+
+    <!-- PROMPTS -->
+    <section>
+      <h2>Just ask</h2>
+      <div class="prompts">
+        <div v-for="p in prompts" :key="p" class="neo-card prompt">
+          {{ p }}
+        </div>
+      </div>
+    </section>
+
+    <!-- QUICK START -->
+    <section>
+      <h2>Quick start</h2>
+      <div class="tabbar">
+        <button
+          v-for="t in tabs"
+          :key="t.key"
+          :class="{ on: active === t.key }"
+          @click="active = t.key"
+        >
+          {{ t.label }}
+        </button>
+      </div>
+      <pre
+        class="code"
+      ><code>{{ tabs.find((t) => t.key === active).code }}</code></pre>
     </section>
 
     <!-- FEATURES -->
@@ -189,34 +253,6 @@ function copyInstall() {
           </div>
           <h3>{{ f.title }}</h3>
           <p>{{ f.text }}</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- QUICK START -->
-    <section>
-      <h2>Quick start</h2>
-      <div class="tabbar">
-        <button
-          v-for="t in tabs"
-          :key="t.key"
-          :class="{ on: active === t.key }"
-          @click="active = t.key"
-        >
-          {{ t.label }}
-        </button>
-      </div>
-      <pre
-        class="code"
-      ><code>{{ tabs.find((t) => t.key === active).code }}</code></pre>
-    </section>
-
-    <!-- PROMPTS -->
-    <section>
-      <h2>Just ask</h2>
-      <div class="prompts">
-        <div v-for="p in prompts" :key="p" class="neo-card prompt">
-          {{ p }}”
         </div>
       </div>
     </section>
