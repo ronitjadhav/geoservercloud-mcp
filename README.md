@@ -2,20 +2,11 @@
 
 <!-- mcp-name: io.github.ronitjadhav/geoservercloud-mcp -->
 
-A Model Context Protocol (MCP) server that exposes [GeoServer](https://geoserver.org/) REST API functionality for natural language interaction through AI assistants like Claude, VS Code Copilot, and other MCP-compatible clients.
+![GeoServer MCP](app/public/geoservercloud-mcp.png)
 
-## About
+**🌐 [geoservermcp.maplabs.tech](https://geoservermcp.maplabs.tech)**
 
-This MCP server wraps the [python-geoservercloud](https://github.com/camptocamp/python-geoservercloud) library, exposing 80+ GeoServer operations as MCP tools. This enables AI assistants to manage GeoServer workspaces, datastores, layers, styles, and more through natural language commands.
-
-### Example Interactions
-
-Once connected, you can ask your AI assistant things like:
-
-- _"List all workspaces in GeoServer"_
-- _"Create a new workspace called 'test_data'"_
-- _"What layers are available in the 'topp' workspace?"_
-- _"Create a PostGIS datastore connection"_
+An MCP server that wraps the [python-geoservercloud](https://github.com/camptocamp/python-geoservercloud) library, exposing 80+ GeoServer operations as natural-language tools for AI assistants like Claude, VS Code Copilot, and other MCP-compatible clients.
 
 ---
 
@@ -49,24 +40,27 @@ io.github.ronitjadhav/geoservercloud-mcp
 
 ## Connecting to AI Clients
 
-### VS Code / Cursor
+### Claude Code
 
-Add to your MCP configuration (`.vscode/mcp.json`):
+```bash
+claude mcp add geoserver \
+  --env GEOSERVER_URL=http://localhost:8080/geoserver \
+  --env GEOSERVER_USER=admin \
+  --env GEOSERVER_PASSWORD=geoserver \
+  -- uvx geoservercloud-mcp
+```
 
-```json
-{
-  "servers": {
-    "geoserver": {
-      "command": "uvx",
-      "args": ["geoservercloud-mcp"],
-      "env": {
-        "GEOSERVER_URL": "http://localhost:8080/geoserver",
-        "GEOSERVER_USER": "admin",
-        "GEOSERVER_PASSWORD": "geoserver"
-      }
-    }
-  }
-}
+This adds it at the default _local_ (per-project) scope. Use `--scope user` to make
+it available in all your projects, or `--scope project` to write it to a shared
+`.mcp.json` committed in the repo. Omit the `--env` flags and the AI will ask for
+the URL and credentials at runtime.
+
+Manage it with:
+
+```bash
+claude mcp list
+claude mcp get geoserver
+claude mcp remove geoserver
 ```
 
 ### Claude Desktop
@@ -94,41 +88,21 @@ Add to your Claude Desktop config:
 
 Restart Claude Desktop after saving the configuration.
 
-### Claude Code
+### VS Code / Cursor
 
-Add the server with the `claude mcp add` command:
-
-```bash
-claude mcp add geoserver \
-  --env GEOSERVER_URL=http://localhost:8080/geoserver \
-  --env GEOSERVER_USER=admin \
-  --env GEOSERVER_PASSWORD=geoserver \
-  -- uvx geoservercloud-mcp
-```
-
-This adds it at the default _local_ (per-project) scope. Use `--scope user` to make
-it available in all your projects, or `--scope project` to write it to a shared
-`.mcp.json` committed in the repo. Omit the `--env` flags to configure the connection
-at runtime instead (the AI will ask for the URL and credentials).
-
-Manage it with:
-
-```bash
-claude mcp list
-claude mcp get geoserver
-claude mcp remove geoserver
-```
-
-### Dynamic Configuration (No Hardcoded Credentials)
-
-You can omit the `env` section entirely. The AI will ask you for the GeoServer URL, username, and password at runtime:
+Add to your MCP configuration (`.vscode/mcp.json`):
 
 ```json
 {
-  "mcpServers": {
+  "servers": {
     "geoserver": {
       "command": "uvx",
-      "args": ["geoservercloud-mcp"]
+      "args": ["geoservercloud-mcp"],
+      "env": {
+        "GEOSERVER_URL": "http://localhost:8080/geoserver",
+        "GEOSERVER_USER": "admin",
+        "GEOSERVER_PASSWORD": "geoserver"
+      }
     }
   }
 }

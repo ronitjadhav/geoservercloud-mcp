@@ -37,6 +37,41 @@ tool") flags any new upstream methods that lack a tool.
   pushing. `pre-commit` isn't a poetry dep; install it with
   `pip install --user --break-system-packages pre-commit` if missing.
 
+## Docs site (`app/`)
+
+A Vue 3 + Vite neobrutalist single-page site deployed to GitHub Pages at
+`https://geoservermcp.maplabs.tech`. Source is in `app/`; it is
+**not** part of the Python package.
+
+**Keep it in sync.** Whenever you touch anything user-facing — new tools, new
+install method, changed env vars, new client support — also update the relevant
+copy in `app/src/App.vue`. The things most likely to drift:
+
+- Tool count in the hero lead (`70+ REST operations`)
+- The `prompts` array (example natural-language asks)
+- The `features` grid (capability tiles)
+- Quick-start tab commands (especially the `claude mcp add` snippet)
+
+**Dev:**
+
+```bash
+cd app && npm install   # first time
+npm run dev             # http://localhost:5173/
+```
+
+**Key files:**
+
+- `app/src/App.vue` — all content (data arrays + template)
+- `app/src/style.css` — neobrutalist design tokens and layout
+- `app/public/geoservercloud-mcp.png` — logo (globe + wordmark); trimmed with Pillow
+
+**Deploy:** `.github/workflows/pages.yaml` triggers automatically on pushes to
+`master` that touch `app/**`. No manual step needed.
+
+**Important:** All HTML attribute quotes in `App.vue` must be ASCII `"` (U+0022).
+Smart/curly quotes (`"` / `"`) break Vue's template parser — an editor or
+formatter can silently introduce them, causing cryptic parse errors.
+
 ## Commands
 
 - Install: `poetry install`
