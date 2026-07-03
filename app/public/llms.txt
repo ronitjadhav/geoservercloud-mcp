@@ -1,0 +1,35 @@
+# GeoServer MCP
+
+> A Model Context Protocol (MCP) server that exposes GeoServer's REST API as
+> 80+ natural-language tools for AI assistants like Claude, VS Code Copilot,
+> and other MCP-compatible clients. Also known as GeoServer Cloud MCP or
+> geoservercloud-mcp.
+
+GeoServer MCP wraps the python-geoservercloud library and lets an AI assistant
+manage a GeoServer instance through plain language — no REST calls by hand.
+
+## What it can do
+
+- Workspaces: create, list, and manage workspaces
+- Datastores: PostGIS, JNDI, PMTiles, and generic stores
+- Layers & feature types: publish and manage vector layers
+- Coverage & raster: coverage stores and ImageMosaic granules
+- Styles: upload and assign SLD & MBStyle styles
+- WMS / WMTS cascading: proxy external OGC services as layers
+- Layer groups: compose and manage grouped layers
+- Security & ACL: users, roles, and access-control rules
+- GeoWebCache: manage tile caching for layers
+
+## Install
+
+- PyPI: `pip install geoservercloud-mcp`
+- Run without installing (uv): `uvx geoservercloud-mcp`
+- Claude Code: `claude mcp add geoserver -- uvx geoservercloud-mcp`
+- MCP Registry name: `io.github.ronitjadhav/geoservercloud-mcp`
+
+## Links
+
+- Website: https://geoservermcp.maplabs.tech/
+- Source: https://github.com/ronitjadhav/geoservercloud-mcp
+- Package: https://pypi.org/project/geoservercloud-mcp/
+- Underlying library: https://github.com/camptocamp/python-geoservercloud
