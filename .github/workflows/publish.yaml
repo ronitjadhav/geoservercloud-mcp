@@ -3,7 +3,7 @@ name: Publish
 on:
   push:
     branches:
-      - master # -> dev pre-release (X.Y.Z.devN)
+      - main # -> dev pre-release (X.Y.Z.devN)
     paths-ignore: # docs / website changes should not cut a dev release
       - "**.md"
       - "docs/**"
@@ -58,7 +58,7 @@ jobs:
 
   publish-mcp-registry:
     name: Publish to MCP Registry
-    # Runs for both dev (master) and stable (tag) builds, after the matching
+    # Runs for both dev (main) and stable (tag) builds, after the matching
     # PyPI version exists (the registry validates server.json's version against PyPI).
     needs: publish
     runs-on: ubuntu-24.04

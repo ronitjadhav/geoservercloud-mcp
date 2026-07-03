@@ -24,11 +24,11 @@ tool") flags any new upstream methods that lack a tool.
 
 ## Working in this repo (important)
 
-- **`master` is branch-protected.** All changes go through a PR — **you cannot
-  `git push origin master` directly, and force-pushes are blocked.** A PR only merges
+- **`main` is branch-protected.** All changes go through a PR — **you cannot
+  `git push origin main` directly, and force-pushes are blocked.** A PR only merges
   once the `Lint and test` CI check is green (no approval required — self-merge is
   fine). Escape hatch if ever needed: disable the rule in Settings → Branches, or
-  `gh api -X DELETE repos/ronitjadhav/geoservercloud-mcp/branches/master/protection`.
+  `gh api -X DELETE repos/ronitjadhav/geoservercloud-mcp/branches/main/protection`.
 - Push only to `origin` (`ronitjadhav/geoservercloud-mcp`). There is no `upstream`
   remote anymore (the repo was detached from its fork network); never force-push
   unless explicitly asked.
@@ -66,7 +66,7 @@ npm run dev             # http://localhost:5173/
 - `app/public/geoservercloud-mcp.png` — logo (globe + wordmark); trimmed with Pillow
 
 **Deploy:** `.github/workflows/pages.yaml` triggers automatically on pushes to
-`master` that touch `app/**`. No manual step needed.
+`main` that touch `app/**`. No manual step needed.
 
 **Important:** All HTML attribute quotes in `App.vue` must be ASCII `"` (U+0022).
 Smart/curly quotes (`"` / `"`) break Vue's template parser — an editor or
@@ -92,7 +92,7 @@ hand-bump it.**
 
 - **Cut a release:** `git tag vX.Y.Z && git push origin vX.Y.Z` → publishes stable
   `X.Y.Z` to PyPI **and** the MCP Registry.
-- **Every merge to `master`** publishes `<next-patch-above-latest-tag>.dev<run_id>`
+- **Every merge to `main`** publishes `<next-patch-above-latest-tag>.dev<run_id>`
   to both (dev builds; hidden from `pip install` without `--pre`). Docs-only changes
   (`**.md`, `docs/**`) are skipped via `paths-ignore`.
 

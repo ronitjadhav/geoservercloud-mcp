@@ -185,7 +185,7 @@ PyPI publishing is automated by `.github/workflows/publish.yaml` via PyPI
 **The version is derived from git — you never edit it by hand:**
 
 - **Pushing a `v*` tag** publishes that stable version (`v0.0.2` → `0.0.2`).
-- **Every merge to `master`** publishes a dev pre-release `<next-patch>.dev<run_id>`,
+- **Every merge to `main`** publishes a dev pre-release `<next-patch>.dev<run_id>`,
   where `<next-patch>` is one patch above the latest `v*` tag (so with `v0.0.1` out,
   merges publish `0.0.2.devN`, sorting ahead of `0.0.1`). `run_id` is unique and
   always increasing, so builds never collide even if the repo is recreated. Dev
