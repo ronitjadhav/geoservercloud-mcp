@@ -1,0 +1,23 @@
+# ignore all python cache files recursively
+**/__pycache__/
+/.pytest_cache/
+/.venv/
+.coverage
+docs/build
+
+# MCP Registry tokens (security sensitive)
+.mcpregistry_github_token
+.mcpregistry_registry_token
+
+# IDE
+.idea/
+
+# Build artifacts
+dist/
+*.whl
+*.tar.gz
+
+# Docs site (app/)
+app/node_modules/
+app/dist/
+app/.vite/

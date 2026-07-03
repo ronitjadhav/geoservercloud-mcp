@@ -1,0 +1,93 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main # -> dev pre-release (X.Y.Z.devN)
+    paths-ignore: # docs / website changes should not cut a dev release
+      - "**.md"
+      - "docs/**"
+      - "app/**"
+      - ".github/workflows/pages.yaml"
+    tags:
+      - "v*" # -> stable release (version taken from the tag, e.g. v0.0.2 -> 0.0.2)
+
+jobs:
+  publish:
+    name: Build and publish to PyPI
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      id-token: write # OIDC for PyPI Trusted Publishing (no stored token)
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # need full tag history to derive the version
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install
+        run: poetry install
+      - name: Tests
+        run: poetry run pytest -q
+      - name: Determine version
+        id: version
+        # Version is derived from git, not pyproject.toml (no manual bumps):
+        #   tag build       -> the tag itself (v0.0.2 -> 0.0.2)
+        #   dev build (push) -> next patch above the latest v* tag + .dev<run_id>
+        #                       (e.g. latest v0.0.1 -> 0.0.2.dev<id>, sorts ahead of 0.0.1)
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            V="${GITHUB_REF#refs/tags/v}"
+          else
+            LAST="$(git describe --tags --match 'v*' --abbrev=0 2>/dev/null || echo v0.0.0)"
+            LAST="${LAST#v}"
+            NEXT="$(python3 -c "p=[int(x) for x in '${LAST}'.split('.')[:3]]; p+=[0]*(3-len(p)); p[2]+=1; print('%d.%d.%d'%tuple(p))")"
+            V="${NEXT}.dev${{ github.run_id }}"
+          fi
+          poetry version "$V"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+      - name: Build
+        run: poetry build
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  publish-mcp-registry:
+    name: Publish to MCP Registry
+    # Runs for both dev (main) and stable (tag) builds, after the matching
+    # PyPI version exists (the registry validates server.json's version against PyPI).
+    needs: publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      id-token: write # OIDC for MCP Registry (namespace io.github.<owner>)
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Sync server.json version to the published version
+        env:
+          VERSION: ${{ needs.publish.outputs.version }}
+        run: |
+          python3 - "$VERSION" <<'PY'
+          import json, sys
+          v = sys.argv[1]
+          with open("server.json") as f:
+              d = json.load(f)
+          d["version"] = v
+          for pkg in d.get("packages", []):
+              pkg["version"] = v
+          with open("server.json", "w") as f:
+              json.dump(d, f, indent=2)
+              f.write("\n")
+          PY
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+      - name: Authenticate (GitHub OIDC)
+        run: ./mcp-publisher login github-oidc
+      - name: Publish
+        run: ./mcp-publisher publish
