@@ -2,13 +2,83 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="./geoservercloud-mcp.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/geoservercloud-mcp.png" />
+    <link rel="canonical" href="https://geoservermcp.maplabs.tech/" />
+
     <title>GeoServer MCP — natural-language GeoServer for AI assistants</title>
     <meta
       name="description"
-      content="An MCP server that lets AI assistants manage GeoServer workspaces, datastores, layers, and styles through natural language."
+      content="GeoServer MCP is a Model Context Protocol server that lets AI assistants like Claude manage GeoServer workspaces, datastores, layers, and styles through natural language. 80+ GeoServer REST operations as MCP tools."
     />
+    <meta
+      name="keywords"
+      content="GeoServer MCP, GeoServer Cloud MCP, geoservercloud-mcp, Model Context Protocol, GeoServer REST API, MCP server, Claude GeoServer, AI GIS, GeoServer AI assistant, python-geoservercloud"
+    />
+    <meta name="author" content="Ronit Jadhav" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="GeoServer MCP" />
+    <meta
+      property="og:title"
+      content="GeoServer MCP — talk to GeoServer in plain language"
+    />
+    <meta
+      property="og:description"
+      content="A Model Context Protocol server exposing 80+ GeoServer operations as natural-language tools for AI assistants like Claude."
+    />
+    <meta property="og:url" content="https://geoservermcp.maplabs.tech/" />
+    <meta
+      property="og:image"
+      content="https://geoservermcp.maplabs.tech/geoservercloud-mcp.png"
+    />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="GeoServer MCP — talk to GeoServer in plain language"
+    />
+    <meta
+      name="twitter:description"
+      content="A Model Context Protocol server exposing 80+ GeoServer operations as natural-language tools for AI assistants like Claude."
+    />
+    <meta
+      name="twitter:image"
+      content="https://geoservermcp.maplabs.tech/geoservercloud-mcp.png"
+    />
+
+    <!-- Structured data: read by search engines and AI crawlers without running JS -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "GeoServer MCP",
+        "alternateName": ["GeoServer Cloud MCP", "geoservercloud-mcp"],
+        "description": "A Model Context Protocol (MCP) server that exposes GeoServer's REST API as 80+ natural-language tools for AI assistants like Claude, VS Code Copilot, and other MCP-compatible clients. Manage workspaces, datastores, layers, styles, and security through plain language.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Windows, macOS, Linux",
+        "url": "https://geoservermcp.maplabs.tech/",
+        "downloadUrl": "https://pypi.org/project/geoservercloud-mcp/",
+        "codeRepository": "https://github.com/ronitjadhav/geoservercloud-mcp",
+        "softwareVersion": "1.0.0",
+        "license": "https://opensource.org/licenses/BSD-2-Clause",
+        "programmingLanguage": "Python",
+        "keywords": "GeoServer, MCP, Model Context Protocol, GIS, REST API, AI assistant, Claude",
+        "author": {
+          "@type": "Person",
+          "name": "Ronit Jadhav"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,7 +87,31 @@
     />
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app">
+      <!-- Static fallback for crawlers / AI that don't execute JavaScript.
+           Vue replaces this with the interactive app on mount. -->
+      <noscript>
+        <h1>GeoServer MCP</h1>
+        <p>
+          GeoServer MCP (also known as GeoServer Cloud MCP,
+          <code>geoservercloud-mcp</code>) is a Model Context Protocol server
+          that lets AI assistants like Claude manage GeoServer through natural
+          language. It exposes 80+ GeoServer REST operations — workspaces,
+          datastores, layers, styles, coverage stores, WMS/WMTS cascading, layer
+          groups, security and ACL — as MCP tools.
+        </p>
+        <p>
+          Install with <code>pip install geoservercloud-mcp</code> or add it to
+          Claude Code with
+          <code>claude mcp add geoserver -- uvx geoservercloud-mcp</code>.
+        </p>
+        <p>
+          <a href="https://github.com/ronitjadhav/geoservercloud-mcp">GitHub</a>
+          ·
+          <a href="https://pypi.org/project/geoservercloud-mcp/">PyPI</a>
+        </p>
+      </noscript>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
