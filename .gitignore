@@ -20,3 +20,4 @@ dist/
 # Docs site (app/)
 app/node_modules/
 app/dist/
+app/.vite/
