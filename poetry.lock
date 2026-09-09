@@ -697,14 +697,14 @@ tasks = ["pydocket (>=0.20.0)"]
 
 [[package]]
 name = "geoservercloud"
-version = "0.8.7"
+version = "0.8.12"
 description = "Lightweight Python client to interact with GeoServer Cloud REST API, GeoServer ACL and OGC services"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "geoservercloud-0.8.7-py3-none-any.whl", hash = "sha256:a00f44e44db149c39f624d0a6dbcf240e9c3407c74fb0717326ded66ed482de7"},
-    {file = "geoservercloud-0.8.7.tar.gz", hash = "sha256:1ae564a038eab3f1610df641040382338f9feadf937ab8d7223380c2f6a4f6ef"},
+    {file = "geoservercloud-0.8.12-py3-none-any.whl", hash = "sha256:49fb20337e7d6929083112814c63e8b96cf81bee009179d3a754df707963c363"},
+    {file = "geoservercloud-0.8.12.tar.gz", hash = "sha256:b0ffdbd40330d0c8e195d8c7e0becaed9197c0c11370ba26386c278922e24f29"},
 ]
 
 [package.dependencies]
